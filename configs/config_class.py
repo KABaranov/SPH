@@ -1,4 +1,5 @@
 import numpy as np
+from ..core.kernels.get_kernel import get_kernel
 
 
 class Config:
@@ -21,3 +22,6 @@ class Config:
         self.beta = start_param["beta"] if "beta" in start_param.keys() else 2.0
         self.epsilon = start_param["epsilon"] if "epsilon" in start_param.keys() else 0.01
         self.p_floor = start_param["p_floor"] if "p_floor" in start_param.keys() else 0.0
+
+        self.kernel_name = start_param["kernel"] if "kernel" in start_param.keys() else "gauss"
+        self.kernel, self.grad = get_kernel(self.kernel_name)
