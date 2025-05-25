@@ -35,19 +35,35 @@ def plot_eos_monotonic(cfg: Config, a: float = 0.0, b: float = 2.0) -> None:
 # Скорость звука для Тейта - это корень частной производной dp/drho
 # Функция проверяет численную производную
 # (Может не выдавать True из-за p_floor)
-def sound_speed(ρ, cfg):
+def sound_speed(rho: float, cfg: Config):
     """Аналитический c(ρ) без учёта p_floor."""
-    return np.sqrt(cfg.gamma * cfg.B / cfg.rho0) * (ρ/cfg.rho0)**((cfg.gamma-1)/2)
+    return np.sqrt(cfg.gamma * cfg.B / cfg.rho0) * (rho/cfg.rho0)**((cfg.gamma-1)/2)
 
 
-def test_sound_speed(cfg, delta=1e-6):
+def test_sound_speed(cfg: Config, delta: float = 1e-6):
     rho = cfg.rho0 * 1.02            # на 2 % выше, чтобы точно > p_floor
     dpdrho_num = (eos(rho*(1+delta), cfg) - eos(rho*(1-delta), cfg)) / (2*rho*delta)
     c_num = np.sqrt(dpdrho_num)
-    c_theory  = sound_speed(rho, cfg)
+    c_theory = sound_speed(rho, cfg)
     return abs(c_num - c_theory)/c_theory < 1e-4
+
+
+# Функция проверки eos на математическую корректность
+# запускает 3 теста
+def test_eos_all(cfg: Config, k1: float = 0.95, k2: float = 1.05,
+                 delta: float = 1e-6) -> None:
+    print("Проверка eos на математическую корректность:")
+    r1 = test_eos_at_rho0(cfg)
+    print(f"\tПроверка нулевого давления{'' if r1 else ' не'} пройдена")
+    r2 = test_eos_monotonic(cfg, k1, k2)
+    print(f"\tПроверка монотонности{'' if r2 else ' не'} пройдена")
+    r3 = test_sound_speed(cfg, delta)
+    print(f"\tПроверка правильной скорости звука{'' if r3 else ' не'} пройдена")
+    print("\t============================")
+    result = r1 * r2 * r3
+    print(f"\tПроверка{'' if result else ' не'} пройдена")
 
 
 if __name__ == "__main__":
     config = get_config("common", print_param=True)
-    print(test_sound_speed(config))
+    test_eos_all(config)
