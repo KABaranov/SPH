@@ -1,142 +1,51 @@
-"""sph/core/equations.py
----------------------------------
-Уравнения ГСЧ (SPH) в компактном классе `SPHEquations`.
-
-Особенности реализации
-======================
-* **Уравнение состояния Тейта** с «флорой» (p ≥ 0), чтобы подавить
-  тензиональную нестабильность.
-* **Искусственная вязкость** Монaгана (α, β, ε).
-* Раздельные методы:
-  - `compute_densities`  — сумма ядер,
-  - `compute_pressure`   — EOS,
-  - `compute_drho_dt`    — континуитет,
-  - `compute_accelerations` — градиент давления + вязкость + внешняя сила.
-* Поддержка 2D и 3D (определяется размерностью координат `Particle.x`).
-"""
-from __future__ import annotations
-
-from typing import List, Optional
+from SPH.configs.config_class import Config
+from eos import eos
+import matplotlib.pyplot as plt
 import numpy as np
 
-from core.particle import Particle
-from core.kernels import Kernel
+from SPH.configs.get_config import get_config
 
 
-class SPHEquations:
-    """Набор уравнений для SPH‑расчёта."""
+# Проверка нулевого давления rho=rho_0
+# Для классической формы уравнения Тейта (см. функцию eos)
+# при rho=rho_0 давление строго равно 0 (если p_floor <= 0)
+def test_eos_at_rho0(cfg: Config) -> bool:
+    return eos(cfg.rho0, cfg) == max(0.0, cfg.p_floor)
 
-    def __init__(
-        self,
-        rho0: float,
-        gamma: float = 7.0,
-        B: Optional[float] = None,
-        c0: Optional[float] = None,
-        alpha: float = 1.0,
-        beta: float = 2.0,
-        epsilon: float = 0.01,
-        p_floor: float = 0.0,  # отсечка отрицат. давлений
-    ) -> None:
-        self.rho0 = rho0
-        self.gamma = gamma
-        if B is None:
-            if c0 is None:
-                raise ValueError("Нужно указать B или c0 для EOS")
-            self.B = rho0 * c0**2 / gamma
-            self.c0 = c0
-        else:
-            self.B = B
-            self.c0 = np.sqrt(B * gamma / rho0)
-        self.alpha = alpha
-        self.beta = beta
-        self.epsilon = epsilon
-        self.p_floor = p_floor
 
-    # ------------------------------------------------------------------
-    # Уравнение состояния
-    # ------------------------------------------------------------------
-    def eos(self, rho: float) -> float:
-        """Tait EOS: p = B * ((rho / rho0)^gamma − 1)  c отсечкой p ≥ p_floor"""
-        p = self.B * ((rho / self.rho0) ** self.gamma - 1.0)
-        return max(p, self.p_floor)
+# Проверка монотонности (2 функции)
+# Функция должна быть строго возрастающей
+# Если rho_2 > rho_1, то p(rho_2) > p(rho_1) (при любом gamma > 1)
+def test_eos_monotonic(cfg: Config, k1: float, k2: float) -> bool:
+    p1 = eos(k1*cfg.rho0, cfg)
+    p2 = eos(k2*cfg.rho0, cfg)
+    return p2 > p1
 
-    # ------------------------------------------------------------------
-    # Расчёт плотности
-    # ------------------------------------------------------------------
-    def compute_densities(self, particles: List[Particle]) -> None:
-        """ρᵢ = Σⱼ mⱼ W(rᵢⱼ)"""
-        for pi in particles:
-            rho = 0.0
-            for w, j in zip(pi.W, pi.neigh):
-                rho += particles[j].m * w
-            pi.rho = rho
 
-    # ------------------------------------------------------------------
-    # Обновление давления
-    # ------------------------------------------------------------------
-    def compute_pressure(self, particles: List[Particle]) -> None:
-        for p in particles:
-            p.p = self.eos(p.rho)
+# Функция построения графика монотонности
+def plot_eos_monotonic(cfg: Config, a: float = 0.0, b: float = 2.0) -> None:
+    rho = np.linspace(a * cfg.rho0, b * cfg.rho0, int(cfg.rho0 * 2.0))
+    p = [eos(rho_i, cfg) for rho_i in rho]
+    plt.plot(rho, p)
+    plt.title("Монотонность функции p(rho)")
+    plt.show()
 
-    # ------------------------------------------------------------------
-    # Континуитет: dρ/dt
-    # ------------------------------------------------------------------
-    def compute_drho_dt(self, particles: List[Particle], kernel: Kernel) -> None:
-        for i, pi in enumerate(particles):
-            drho = 0.0
-            for j in pi.neigh:
-                pj = particles[j]
-                vij = pi.v - pj.v
-                grad = kernel.grad_W(pi.x - pj.x)
-                drho += pj.m * np.dot(vij, grad)
-            pi.drho_dt = drho
 
-    # ------------------------------------------------------------------
-    # Уравнение движения
-    # ------------------------------------------------------------------
-    def compute_accelerations(
-        self,
-        particles: List[Particle],
-        kernel: Kernel,
-        external_force: Optional[np.ndarray] = None,
-    ) -> None:
-        if external_force is None:
-            external_force = np.zeros_like(particles[0].v)
+# Правильная скорость звука
+# Скорость звука для Тейта - это корень частной производной dp/drho
+# Функция проверяет численную производную
+# (Может не выдавать True из-за p_floor)
+def test_sound_speed(cfg: Config, delta: float = 1e-6):
+    rho = cfg.rho0
+    p_plus = eos(rho*(1+delta), cfg)
+    p_minus = eos(rho*(1-delta), cfg)
+    dpdrho_num = (p_plus - p_minus) / (2*rho*delta)
+    c_num = np.sqrt(dpdrho_num)
+    c_theory = np.sqrt(cfg.gamma * cfg.B / cfg.rho0)
+    print(c_num, c_theory)
+    return abs(c_num - c_theory)/c_theory < 1e-4
 
-        for i, pi in enumerate(particles):
-            acc = np.zeros_like(pi.v)
-            for j in pi.neigh:
-                pj = particles[j]
-                rij = pi.x - pj.x
-                grad_w = kernel.grad_W(rij)
 
-                # Давление (symmetric form)
-                pij_term = pi.p / (pi.rho ** 2) + pj.p / (pj.rho ** 2)
-
-                # Искусственная вязкость
-                visc = self._artificial_viscosity(pi, pj, rij, kernel)
-
-                acc -= pj.m * (pij_term + visc) * grad_w
-
-            pi.dv_dt = acc + external_force
-
-    # ------------------------------------------------------------------
-    # Искусственная вязкость Монaгана
-    # ------------------------------------------------------------------
-    def _artificial_viscosity(
-        self,
-        pi: Particle,
-        pj: Particle,
-        rij: np.ndarray,
-        kernel: Kernel,
-    ) -> float:
-        vij = pi.v - pj.v
-        rij_dot = np.dot(vij, rij)
-        if rij_dot >= 0:
-            return 0.0  # расходятся — без вязкости
-
-        h = kernel.h
-        mu_ij = h * rij_dot / (np.dot(rij, rij) + self.epsilon * h ** 2)
-        c_bar = self.c0  # для простоты: const звук
-        rho_bar = 0.5 * (pi.rho + pj.rho)
-        return (-self.alpha * c_bar * mu_ij + self.beta * mu_ij**2) / rho_bar
+if __name__ == "__main__":
+    config = get_config("common", print_param=True)
+    print(test_sound_speed(config))
