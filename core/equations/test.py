@@ -74,6 +74,8 @@ def test_eos_all(cfg: Config, k1: float = 0.95, k2: float = 1.05,
 # =============================================
 # Проверка расчёта плотности
 # =============================================
+
+# Тест 1: Однородная решётка 2D
 def density_test1(cfg: Config, out_plot=False) -> None:
     print("Проверка расчёта плотности (Тест 1):")
     width, height, dx = cfg.width, cfg.height, cfg.dx
@@ -93,9 +95,9 @@ def density_test1(cfg: Config, out_plot=False) -> None:
             dr = pj.x - pi.x
             pi.neigh.append(pj.id)
             pi.neigh_w.append(kernel(r=dr, h=pi.h, dim=cfg.dim))
-    # =========== Сам тест =============
+
     compute_densities(particles)
-    # ==================================
+
     x_out, y_out, rho_out = [], [], []
     for pi in particles:
         x_out.append(pi.x[0])
@@ -111,7 +113,50 @@ def density_test1(cfg: Config, out_plot=False) -> None:
         plt.show()
 
 
+# Тест 2: Синус-мода
+def density_test2(cfg: Config, out_plot=False) -> None:
+    print("Проверка расчёта плотности (Тест 2):")
+    Ns = np.array([200, 400, 800, 1600])
+    errs = []
+    for N in Ns:
+        dim, L = 1, 1
+        dx = L / N
+        eps = 0.1  # Амплитуда синуса
+        k = 2 * np.pi / L  # одна волна на домен
+        h = 1.3 * dx
+        kernel = cfg.kernel
+
+        xs = np.linspace(0, L - dx, N)
+        rho0 = 1000.0  # целевая базовая плотность
+        m0 = rho0 * dx ** dim  # “средняя” масса
+        m_i = m0 * (1 + eps * np.sin(k * xs))  # переменная масса → синус в ρ
+        particles = []
+        for x, m in zip(xs, m_i):
+            p = Particle(
+                id=len(particles), m=m, p=0, x=np.array([x, 0, 0]),
+                drho_dt=0, dv_dt=np.array([0, 0, 0]), state=1, h=h,
+                neigh=[], neigh_w=[], rho=rho0, v=np.array([0, 0, 0])
+            )
+            particles.append(p)
+        for pi in particles:
+            for pj in particles:
+                dr = pj.x - pi.x
+                dr -= L * round(dx / L)  # периодические границы
+                pi.neigh.append(pj.id)
+                pi.neigh_w.append(kernel(r=dr, h=pi.h, dim=1))
+
+        compute_densities(particles)
+
+        rho_exact = rho0 * (1 + eps * np.sin(k * xs))
+        rho_num = np.array([p.rho for p in particles])
+        err_L2 = np.linalg.norm(rho_num - rho_exact) / np.linalg.norm(rho_exact)
+        err_Linf = np.max(np.abs(rho_num - rho_exact)) / rho0
+        print("\t", err_L2, err_Linf)
+        errs.append(err_L2)
+    print("\t", errs)
+
+
 if __name__ == "__main__":
     config = get_config("common", print_param=True)
     test_eos_all(config)
-    density_test1(config, out_plot=True)
+    density_test2(config, out_plot=True)
