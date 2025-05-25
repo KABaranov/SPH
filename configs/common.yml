@@ -1,6 +1,6 @@
 # Общий файл конфигурации (обязательный)
 profile: 'water'
-scenario: 'square_drop'
+scenario: 'density_test1'
 
 # Общие численные параметры
 gamma: 7.0            # показатель адиабаты в EOS

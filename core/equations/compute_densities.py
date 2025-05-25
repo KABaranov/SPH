@@ -1,5 +1,5 @@
 from typing import List
-from ..particle.particle_dataclass import Particle
+from SPH.core.particle.particle_dataclass import Particle
 
 
 # ------------------------------------------------------------------

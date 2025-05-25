@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def wendland_c2_kernel(r, h, *, dim: int = 3):
+def wendland_c2_kernel(r, h, *, dim: int = 2):
     """
     Ядро Вендланда C2: W(|r|,h) = σ_d / h^d · (1-q)^4(1+4q)   (q≤1).
 
@@ -13,18 +13,17 @@ def wendland_c2_kernel(r, h, *, dim: int = 3):
 
     Returns
     -------
-    W   : ndarray — значение ядра
+    W   : float — значение ядра
     """
     # σd : нормировка для d = 1,2,3  (∫WdV = 1)
+    r = np.asarray(r, dtype=float)
+    q = np.linalg.norm(r, axis=-1) / h  # q = r/h
+    if q > 2.0:
+        return 0.0
     sigma = {1: 3 / 4,
              2: 7 / (4 * np.pi),
              3: 21 / (16 * np.pi)}[dim] / np.pow(h, dim)
-    r = np.asarray(r, dtype=float)
-    q = np.linalg.norm(r, axis=-1) / h  # q = r/h
-
-    if q > 1:
-        return 0.0
-    phi = ((1 - q) ** 4) * (1 + 4 * q)
+    phi = (1 - 0.5*q)**4 * (2*q + 1)
     return sigma * phi
 
 
@@ -36,20 +35,46 @@ def wendland_c2_grad(r, h, *, dim: int = 3):
     -------
     gradW : ndarray — (…)×dim массив (та же форма, что r)
     """
-    r = np.asarray(r, dtype=float)
-    q = np.linalg.norm(r, axis=-1, keepdims=True) / h
-    if q == 0 or q > 1:
-        return np.zeros(dim)
     sigma = {1: 3 / 4,
              2: 7 / (4 * np.pi),
              3: 21 / (16 * np.pi)}[dim] / np.pow(h, dim)
+    r = np.asarray(r, dtype=np.float64)
 
-    # φ'(q) = d/dq[(1-q)^4(1+4q)] = -20 q (1-q)^3  (при q≤1)
-    phi_prime = np.where(q <= 1.0, -20.0 * q * (1 - q)**3, 0.0)
+    # --- если подан модуль, добавим фиктивную компоненту для унификации -------
+    scalar_input = (r.ndim == 0) or (r.ndim == 1 and r.shape[-1] != dim)
+    if scalar_input:
+        # |r| → вектор нулей той же размерности (градиент = 0)
+        r_vec = np.zeros(r.shape + (dim,))
+        r_mag = np.asarray(r)
+    else:
+        r_vec = r
+        r_mag = np.linalg.norm(r_vec, axis=-1)
 
-    dWdq = sigma * phi_prime  # dW/dq
-    gradW = np.where(q > 0,
-                     dWdq / (h * q) * r,              # ∇W = dW/dq·∇q
-                     0.0)
+    q = r_mag / h
+    a = 1.0 - 0.5 * q           # вспомогательное (1 - q/2)
+
+    # радиальная производная: dW/dr = σ_d / h^{d+1} * (-5 q a^3)   (для q<2)
+    dw_dq = -5.0 * q * a**3
+    factor = sigma / h**(dim + 1)
+    dW_dr = np.where(q < 2.0, factor * dw_dq, 0.0)
+
+    # векторный градиент: ∇W = dW/dr * r̂
+    # безопасно обрабатываем r=0
+    with np.errstate(divide='ignore', invalid='ignore'):
+        gradW = (dW_dr[..., None] * r_vec) / r_mag[..., None]
+        gradW = np.nan_to_num(gradW)   # заменяем NaN при r=0 на 0
+
+    # если вход был скалярным |r| — вернём нули такой же формы
+    if scalar_input:
+        gradW = np.zeros(r_mag.shape + (dim,))
 
     return gradW
+
+
+if __name__ == "__main__":
+    # Проверка нормировки
+    dx = 0.01
+    h = dx * 1.3
+    r = np.linspace([0.0], 2.5, 500) * h  # радиальная сетка
+    y = [wendland_c2_kernel(ri, h, dim=1) * h for ri in r]
+    print(dx * sum(y))

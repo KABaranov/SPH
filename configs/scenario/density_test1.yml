@@ -1,0 +1,6 @@
+dx: 0.02
+h: 0.048
+dim: 2
+width: 0.5
+height: 0.5
+kernel: "wendland"

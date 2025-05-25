@@ -1,10 +1,17 @@
 from SPH.configs.config_class import Config
+from SPH.core.particle.particle_dataclass import Particle
+from compute_densities import compute_densities
 from eos import eos
+
 import matplotlib.pyplot as plt
 import numpy as np
 
 from SPH.configs.get_config import get_config
 
+
+# ===========================================
+# Проверка eos
+# ===========================================
 
 # Проверка нулевого давления rho=rho_0
 # Для классической формы уравнения Тейта (см. функцию eos)
@@ -64,6 +71,47 @@ def test_eos_all(cfg: Config, k1: float = 0.95, k2: float = 1.05,
     print(f"\tПроверка{'' if result else ' не'} пройдена")
 
 
+# =============================================
+# Проверка расчёта плотности
+# =============================================
+def density_test1(cfg: Config, out_plot=False) -> None:
+    print("Проверка расчёта плотности (Тест 1):")
+    width, height, dx = cfg.width, cfg.height, cfg.dx
+    kernel = cfg.kernel
+    x, y = [i * dx for i in range(int(width // dx) + 2)], [i * dx for i in range(int(height // dx) + 2)]
+    particles = []
+    for xi in x:
+        for yi in y:
+            p = Particle(
+                id=len(particles), m=cfg.rho0*(dx**cfg.dim), p=0, x=np.array([xi, yi, 0]),
+                drho_dt=0, dv_dt=np.array([0, 0, 0]), state=1, h=cfg.h,
+                neigh=[], neigh_w=[], rho=cfg.rho0, v=np.array([0, 0, 0])
+            )
+            particles.append(p)
+    for pi in particles:
+        for pj in particles:
+            dr = pj.x - pi.x
+            pi.neigh.append(pj.id)
+            pi.neigh_w.append(kernel(r=dr, h=pi.h, dim=cfg.dim))
+    # =========== Сам тест =============
+    compute_densities(particles)
+    # ==================================
+    x_out, y_out, rho_out = [], [], []
+    for pi in particles:
+        x_out.append(pi.x[0])
+        y_out.append(pi.x[1])
+        rho_out.append(pi.rho)
+    rho_min, rho_max = min(rho_out), max(rho_out)
+    print(f"\tМинимальная плотность: {rho_min}\n\tМаксимальная плотность {rho_max}")
+    if out_plot:
+        cmap = plt.get_cmap('viridis')
+        norm = plt.Normalize(rho_min, rho_max)
+        line_colors = cmap(norm(rho_out))
+        plt.scatter(x_out, y_out, color=line_colors)
+        plt.show()
+
+
 if __name__ == "__main__":
     config = get_config("common", print_param=True)
     test_eos_all(config)
+    density_test1(config, out_plot=True)
