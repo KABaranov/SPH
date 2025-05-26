@@ -116,7 +116,9 @@ def density_test1(cfg: Config, out_plot=False) -> None:
 # Тест 2: Синус-мода
 def density_test2(cfg: Config, out_plot=False) -> None:
     print("Проверка расчёта плотности (Тест 2):")
-    Ns = np.array([200, 400, 800, 1600])
+    # Ns = np.array([200, 400, 800, 1600])
+    Ns = np.array([100 * i for i in range(1, 21)])
+    # Ns = np.array([100])
     errs = []
     for N in Ns:
         dim, L = 1, 1
@@ -140,10 +142,15 @@ def density_test2(cfg: Config, out_plot=False) -> None:
             particles.append(p)
         for pi in particles:
             for pj in particles:
-                dr = pj.x - pi.x
-                dr -= L * round(dx / L)  # периодические границы
+                # Для периодических границ, добавляем соседей дважды
+                dr1 = pj.x - pi.x
                 pi.neigh.append(pj.id)
-                pi.neigh_w.append(kernel(r=dr, h=pi.h, dim=1))
+                pi.neigh_w.append(kernel(r=dr1, h=pi.h, dim=1))
+                # L выглядит как [1, 1, 1]
+                # поэтому для 1D приводим к [1, 0, 0] этим костылём
+                dr2 = (L - np.array([0, 1, 1])) - np.abs(dr1)
+                pi.neigh.append(pj.id)
+                pi.neigh_w.append(kernel(r=dr2, h=pi.h, dim=1))
 
         compute_densities(particles)
 
@@ -153,7 +160,8 @@ def density_test2(cfg: Config, out_plot=False) -> None:
         err_Linf = np.max(np.abs(rho_num - rho_exact)) / rho0
         print("\t", err_L2, err_Linf)
         errs.append(err_L2)
-    print("\t", errs)
+    plt.loglog(errs)
+    plt.show()
 
 
 if __name__ == "__main__":
