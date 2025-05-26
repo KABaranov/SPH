@@ -295,6 +295,13 @@ def density_test2(cfg: Config, out_plot=False) -> None:
     qmax = 10.0  # Усечение соседей для build_neigh
     kernel = cfg.kernel
     print(f"alpha={alpha}\tbeta: {beta}\tkappa0={kappa0}\tkernel={cfg.kernel_name}\n")
+    if out_plot:
+        N = max(Ns)
+        dx = L / N
+        xs = np.linspace(0, L - dx, N)
+        rho_exact = rho0 * (1 + eps * np.sin(k * xs))
+        plt.plot(xs, rho_exact)
+
     for N in Ns:
         dx = L / N
         kappa = kappa0 * (N / 128) ** beta
@@ -320,16 +327,11 @@ def density_test2(cfg: Config, out_plot=False) -> None:
         shepard_filter(particles, n_iter=1)
         # mls_correction(particles, L=L, n_iter=2)
         check_moments(particles, h, rho0_list, L=L)
-
-        rho_exact = rho0 * (1 + eps * np.sin(k * xs))
         rho_num = np.array([p.rho for p in particles])
+        rho_exact = rho0 * (1 + eps * np.sin(k * xs))
         # Вывод для сравнения rho и периодических границ
         if out_plot:
             plt.plot(xs, rho_num)
-            plt.plot(xs, rho_exact)
-            plt.legend(["Численно", "Аналитически"])
-            plt.show()
-
         err_L2 = np.linalg.norm(rho_num - rho_exact) / np.linalg.norm(rho_exact)
         err_Linf = np.max(np.abs(rho_num - rho_exact)) / rho0
         print(f"\tN: {N} errL2: {err_L2} err_Linf: {err_Linf}\n")
@@ -337,6 +339,14 @@ def density_test2(cfg: Config, out_plot=False) -> None:
     errs = np.array(errs)
     print(f"errs: {errs}")
     print(f"p_est: {np.log(errs[:-1]/errs[1:]) / np.log(2)}")
+    if out_plot:
+        leg = ["Аналитически"] + [f"N={N}" for N in Ns]
+        plt.legend(leg)
+        plt.title("Сравнение аналитического и численных решений")
+        plt.show()
+        plt.loglog(Ns, errs)
+        plt.title("Убывание ошибки при увеличении числа узлов в сетке (log-log)")
+        plt.show()
 
 
 if __name__ == "__main__":
