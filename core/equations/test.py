@@ -160,8 +160,9 @@ def density_test2(cfg: Config, out_plot=False) -> None:
         err_Linf = np.max(np.abs(rho_num - rho_exact)) / rho0
         print("\t", err_L2, err_Linf)
         errs.append(err_L2)
-    plt.loglog(errs)
-    plt.show()
+    if out_plot:
+        plt.loglog(errs)
+        plt.show()
 
 
 if __name__ == "__main__":
