@@ -3,4 +3,4 @@ h: 0.026
 dim: 2
 width: 0.5
 height: 0.5
-kernel: "gauss"
+kernel: "wendland"

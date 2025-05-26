@@ -1,7 +1,11 @@
+from __future__ import annotations
+
 import numpy as np
+from typing import Sequence
 
 
-def gaussian_kernel(r, h, dim: int = 3, rcut: float = 3.0):
+def gaussian_kernel(r: Sequence[float] | float | int, h: float,
+                    dim: int = 2, rcut: float = -1.0) -> float:
     """
     Усечённое гауссово ядро W(|r|, h).
 
@@ -18,16 +22,20 @@ def gaussian_kernel(r, h, dim: int = 3, rcut: float = 3.0):
     """
     # нормирующие коэффициенты σd  (∫WdV = 1)
     sigma = 1.0 / np.pow(np.pi, dim / 2.0)
-    r = np.asarray(r, dtype=float)
-    q = np.linalg.norm(r, axis=-1) / h  # q = r/h
-    if q > rcut:
+    if np.isscalar(r):
+        q = r / h
+    else:
+        r = np.asarray(r, dtype=float)
+        q = np.linalg.norm(r, axis=-1) / h  # q = r/h
+    if (rcut != -1) and (q > rcut):
         return 0
     coeff = sigma / np.pow(h, dim)
     kernel = coeff / np.exp(q ** 2.0)
     return kernel
 
 
-def gaussian_grad(r, h, dim: int = 3, rcut: float = 3.0):
+def gaussian_grad(r: Sequence[float] | float | int, h: float,
+                  dim: int = 2, rcut: float = 3.0):
     """
     Градиент гауссова ядра ∇_r W (вектор той же размерности, что r).
 
@@ -43,13 +51,8 @@ def gaussian_grad(r, h, dim: int = 3, rcut: float = 3.0):
 
 
 if __name__ == "__main__":
-    ra = np.array([0.0, 0.0, 0.0])
-    rb = np.array([0.0, 0.0, 0.0])
-    dr = ra - rb
-
-    W_val = gaussian_kernel(dr, h=0.2, dim=3)
-    grad_W = gaussian_grad(dr, h=0.2, dim=3)
-
-    print(f"W = {W_val:.4e}")
-    print("∇W =", grad_W)
-
+    from cubic_spline import discrete_M0
+    dx = 1 / 2048
+    for kappa in (1.3, 1.4, 1.5, 1.6):
+        h = kappa*dx     # dx = 1/N
+        print(kappa, discrete_M0(gaussian_kernel, h, dx))

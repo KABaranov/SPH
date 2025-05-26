@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 import numpy as np
+from typing import Sequence
 
 
-def wendland_c2_kernel(r, h, *, dim: int = 2):
+def wendland_c2_kernel(r: Sequence[float] | float | int, h: float, dim: int = 2):
     """
     Ядро Вендланда C2: W(|r|,h) = σ_d / h^d · (1-q)^4(1+4q)   (q≤1).
 
@@ -15,9 +18,11 @@ def wendland_c2_kernel(r, h, *, dim: int = 2):
     -------
     W   : float — значение ядра
     """
-    # σd : нормировка для d = 1,2,3  (∫WdV = 1)
-    r = np.asarray(r, dtype=float)
-    q = np.linalg.norm(r, axis=-1) / h  # q = r/h
+    if np.isscalar(r):
+        q = r / h
+    else:
+        r = np.asarray(r, dtype=float)
+        q = np.linalg.norm(r, axis=-1) / h  # q = r/h
     if q > 2.0:
         return 0.0
     sigma = {1: 3 / 4,
@@ -27,7 +32,7 @@ def wendland_c2_kernel(r, h, *, dim: int = 2):
     return sigma * phi
 
 
-def wendland_c2_grad(r, h, *, dim: int = 3):
+def wendland_c2_grad(r: Sequence[float] | float | int, h: float, dim: int = 3):
     """
     Градиент ядра Вендланда C2: ∇_r W.
 
@@ -69,12 +74,3 @@ def wendland_c2_grad(r, h, *, dim: int = 3):
         gradW = np.zeros(r_mag.shape + (dim,))
 
     return gradW
-
-
-if __name__ == "__main__":
-    # Проверка нормировки
-    dx = 0.01
-    h = dx * 1.3
-    r = np.linspace([0.0], 2.5, 500) * h  # радиальная сетка
-    y = [wendland_c2_kernel(ri, h, dim=1) * h for ri in r]
-    print(dx * sum(y))

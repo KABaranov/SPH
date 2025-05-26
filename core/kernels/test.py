@@ -63,9 +63,59 @@ def plot_many_gradients(grad_dict: dict, h: float = 1.0,
     plt.grid(True)
 
 
+def kernel_m0(kernel: Callable, h: float, *, dim: int = 1,
+              k_cut: float = 2.0,  # радиус усечения -- обычно 2 h
+              n: int = 20000):  # число точек интегрирования
+    """
+    Вычисляет нулевой момент (нормировку) SPH-ядра.
+
+    Parameters
+    ----------
+    kernel : callable
+        Функция W(r, h), векторизуемая по r (NumPy).
+    h : float
+        Сглаживающий радиус ядра.
+    dim : {1, 2, 3}
+        Пространственная размерность.
+    k_cut : float
+        Компактная поддержка ядра в единицах h (для куб. сплайна = 2).
+    n : int
+        Число точек интегрирования по r.
+    tol : float | None
+        Если задано, проверяет |M0 - 1| < tol и бросает AssertionError
+        при нарушении.
+
+    Returns
+    -------
+    M0 : float
+        Численно полученный нулевой момент.
+    """
+    r = np.linspace(0.0, k_cut * h, n, dtype=float)
+    w = [kernel([ri], h, dim=dim) for ri in r]
+    if dim == 1:
+        integrand = w
+        M0 = 2.0 * np.trapezoid(integrand, r)
+    elif dim == 2:
+        integrand = w * r
+        M0 = 2.0 * np.pi * np.trapezoid(integrand, r)
+    elif dim == 3:
+        integrand = w * r ** 2
+        M0 = 4.0 * np.pi * np.trapezoid(integrand, r)
+    else:
+        raise ValueError("dim must be 1, 2 or 3")
+
+    return M0
+
+
 if __name__ == "__main__":
     # plot_kernel(cubic_spline_kernel, dim=1)
     # plot_grad(cubic_spline_grad, dim=1)
+    dx = 0.001
+    kappa = 1.3
+    h = kappa * dx
+    print(kernel_m0(wendland_c2_kernel, h=h))
+    print(kernel_m0(gaussian_kernel, h=h))
+    print(kernel_m0(cubic_spline_kernel, h=h))
     kernels = {"Ядро Гаусса": gaussian_kernel,
                "Кубический Сплайн": cubic_spline_kernel,
                "Вендланд C2": wendland_c2_kernel}

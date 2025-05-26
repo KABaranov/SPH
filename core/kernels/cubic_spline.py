@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 import numpy as np
+from typing import Sequence
 
 
-def cubic_spline_kernel(r, h, dim: int = 3):
+def cubic_spline_kernel(r: Sequence[float] | float | int, h: float, dim: int = 2):
     """
     Кубический B-сплайн-ядро W(|r|,h) с поддержкой 2 h.
 
@@ -19,8 +22,11 @@ def cubic_spline_kernel(r, h, dim: int = 3):
     sigma = {1: 2 / 3,
              2: 10 / (7 * np.pi),
              3: 1 / np.pi}[dim] / np.pow(h, dim)
-    r = np.asarray(r, dtype=float)
-    q = np.linalg.norm(r, axis=-1) / h  # q = r/h
+    if np.isscalar(r):
+        q = r / h
+    else:
+        r = np.asarray(r, dtype=float)
+        q = np.linalg.norm(r, axis=-1) / h  # q = r/h
 
     kernel = np.zeros_like(q)
 
@@ -33,7 +39,7 @@ def cubic_spline_kernel(r, h, dim: int = 3):
     return kernel
 
 
-def cubic_spline_grad(r, h, dim: int = 3):
+def cubic_spline_grad(r: Sequence[float] | float | int, h: float, dim: int = 2):
     """
     Градиент кубического сплайна ∇_r W.
 
@@ -62,13 +68,15 @@ def cubic_spline_grad(r, h, dim: int = 3):
     return dWdq / (h*q) * r
 
 
+def discrete_M0(kernel, h, dx):
+    q = np.arange(-2*np.ceil(h/dx), 2*np.ceil(h/dx)+1)  # узлы
+    W = [kernel(np.abs(qi*dx), h, dim=1) for qi in q]
+    return np.sum(W)*dx
+
+
 if __name__ == "__main__":
-    ra = np.array([0.0, 0.0, 0.0])
-    rb = np.array([0.0, 0.0, 0.0])
-    dr = ra - rb
+    dx = 1 / 2048
+    for kappa in (1.3, 1.4, 1.5, 1.6):
+        h = kappa*dx     # dx = 1/N
+        print(kappa, discrete_M0(cubic_spline_kernel, h, dx))
 
-    W_val = cubic_spline_kernel(dr, h=0.2, dim=3)
-    grad_W = cubic_spline_grad(dr, h=0.2, dim=3)
-
-    print(f"W = {W_val:.4e}")
-    print("∇W =", grad_W)
