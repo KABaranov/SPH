@@ -1,0 +1,6 @@
+kappa0: 1.3
+alpha: 1.0
+beta: 0.5
+
+corrector: "shepard"
+corrector_iter: 1

@@ -275,10 +275,10 @@ def mls_correction(particles: List[Particle], L: float = -1.0, n_iter: int = 2) 
 def density_test2(cfg: Config, out_plot=False) -> None:
     print("Проверка расчёта плотности (Тест 2):")
     # Ns = np.array([100, 200, 400, 800, 1600])
-    Ns = [128, 256, 512, 1024, 2048, 4096]
+    Ns = [64, 128, 256, 512, 1024, 2048, 4096]
     # Ns = np.array([100])
     errs = []
-    dim, L = 1, 1.0
+    dim, L = 1, 10000.0
     eps = 0.1  # Амплитуда синуса
     k = 2 * np.pi / L  # одна волна на домен
     # При помощи параметра alpha и kappa0 мы контролируем рост соседей

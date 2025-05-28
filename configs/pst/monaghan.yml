@@ -1,0 +1,2 @@
+pst_param:
+  eps: 0.6            # коэффициент XSPH ε

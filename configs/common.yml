@@ -1,13 +1,15 @@
 # Общий файл конфигурации (обязательный)
 profile: 'water'
 scenario: 'density_test1'
+kernel: 'wendland_c2'
+pst: "monaghan"
+viscosity: "artificial"
 
 # Общие численные параметры
 gamma: 7.0            # показатель адиабаты в EOS
 c0: 20.0              # характерная скорость звука (м/с)
-alpha: 1.0            # искусственная вязкость Monaghan α
-beta: 2.0             # искусственная вязкость Monaghan β
 epsilon: 0.01         # ε в формуле μ_ij
+dim: 1
 
 # Шаг времени и суммарное время моделирования
 dt: 0.001

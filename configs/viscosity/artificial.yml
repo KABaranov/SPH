@@ -1,0 +1,3 @@
+viscosity_param:
+  alpha: 1.0            # искусственная вязкость Monaghan α
+  beta: 2.0             # искусственная вязкость Monaghan β

@@ -20,7 +20,7 @@ def get_pst(name: str, **kwargs) -> IPST:
     Фабричный метод для получения PST-модуля по имени.
 
     Args:
-        name: 'none', 'monaghan' или 'oger'
+        name: 'none', 'monaghan.yml' или 'oger'
         kwargs: параметры конструктора, например eps для Монaгана или beta и kernel для Огер.
 
     Returns:
@@ -33,8 +33,8 @@ def get_pst(name: str, **kwargs) -> IPST:
     if key in ("none",):
         # PSTNone не принимает параметров
         return PSTNone()
-    if key in ("monaghan", "xsph"):
+    if key in ("monaghan.yml", "xsph"):
         return MonaghanXSPH(**kwargs)
     if key in ("oger", "ale"):
         return OgerPST(**kwargs)
-    raise ValueError(f"Unknown PST '{name}'; choose from 'none', 'monaghan', 'oger'.")
+    raise ValueError(f"Unknown PST '{name}'; choose from 'none', 'monaghan.yml', 'oger'.")
