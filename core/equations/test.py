@@ -81,7 +81,8 @@ def test_eos_all(cfg: Config, k1: float = 0.95, k2: float = 1.05,
 # Тест 1: Однородная решётка 2D
 def density_test1(cfg: Config, out_plot=False) -> None:
     print("Проверка расчёта плотности (Тест 1):")
-    width, height, dx = cfg.width, cfg.height, cfg.dx
+    width, height, dx = cfg.L[0], cfg.L[1], cfg.dx
+    qmax = 3 * cfg.h
     kernel = cfg.kernel
     x, y = [i * dx for i in range(int(width // dx) + 2)], [i * dx for i in range(int(height // dx) + 2)]
     particles = []
@@ -93,11 +94,14 @@ def density_test1(cfg: Config, out_plot=False) -> None:
                 neigh=[], neigh_w=[], rho=cfg.rho0, v=np.array([0, 0, 0])
             )
             particles.append(p)
+
+    # build_neigh(particles, h=cfg.h, dim=cfg.dim, box=-1, qmax=10.0, kernel=kernel)
     for pi in particles:
         for pj in particles:
             dr = pj.x - pi.x
-            pi.neigh.append(pj.id)
-            pi.neigh_w.append(kernel(r=dr, h=pi.h, dim=cfg.dim))
+            if np.linalg.norm(dr) <= qmax:
+                pi.neigh.append(pj.id)
+                pi.neigh_w.append(kernel(r=dr, h=pi.h, dim=cfg.dim))
 
     compute_densities(particles)
 
@@ -352,4 +356,5 @@ def density_test2(cfg: Config, out_plot=False) -> None:
 if __name__ == "__main__":
     config = get_config("common", print_param=True)
     test_eos_all(config)
-    density_test2(config, out_plot=True)
+    # density_test2(config, out_plot=True)
+    density_test1(cfg=config, out_plot=True)

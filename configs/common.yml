@@ -1,19 +1,20 @@
 # Общий файл конфигурации (обязательный)
 profile: 'water'
 scenario: 'density_test1'
-kernel: 'wendland_c2'
+kernel: 'wendland'
 pst: "monaghan"
 viscosity: "artificial"
+neighbor_method: "bruteforce"
+
+# Корректор (mls/shepard/none)
+corrector: "shepard"
+corrector_iter: 1
+corrector_period: 1
 
 # Общие численные параметры
 gamma: 7.0            # показатель адиабаты в EOS
-c0: 20.0              # характерная скорость звука (м/с)
 epsilon: 0.01         # ε в формуле μ_ij
-dim: 1
 
 # Шаг времени и суммарное время моделирования
 dt: 0.001
 total_time: 2.0
-
-# Метод поиска соседей по умолчанию
-neighbor_method: kd_tree
