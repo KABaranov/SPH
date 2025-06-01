@@ -78,47 +78,6 @@ def test_eos_all(cfg: Config, k1: float = 0.95, k2: float = 1.05,
 # Проверка расчёта плотности
 # =============================================
 
-# Тест 1: Однородная решётка 2D
-def density_test1(cfg: Config, out_plot=False) -> None:
-    print("Проверка расчёта плотности (Тест 1):")
-    width, height, dx = cfg.L[0], cfg.L[1], cfg.dx
-    qmax = 3 * cfg.h
-    kernel = cfg.kernel
-    x, y = [i * dx for i in range(int(width // dx) + 2)], [i * dx for i in range(int(height // dx) + 2)]
-    particles = []
-    for xi in x:
-        for yi in y:
-            p = Particle(
-                id=len(particles), m=cfg.rho0*(dx**cfg.dim), p=0, x=np.array([xi, yi, 0]),
-                drho_dt=0, dv_dt=np.array([0, 0, 0]), state=1, h=cfg.h,
-                neigh=[], neigh_w=[], rho=cfg.rho0, v=np.array([0, 0, 0])
-            )
-            particles.append(p)
-
-    # build_neigh(particles, h=cfg.h, dim=cfg.dim, box=-1, qmax=10.0, kernel=kernel)
-    for pi in particles:
-        for pj in particles:
-            dr = pj.x - pi.x
-            if np.linalg.norm(dr) <= qmax:
-                pi.neigh.append(pj.id)
-                pi.neigh_w.append(kernel(r=dr, h=pi.h, dim=cfg.dim))
-
-    compute_densities(particles)
-
-    x_out, y_out, rho_out = [], [], []
-    for pi in particles:
-        x_out.append(pi.x[0])
-        y_out.append(pi.x[1])
-        rho_out.append(pi.rho)
-    rho_min, rho_max = min(rho_out), max(rho_out)
-    print(f"\tМинимальная плотность: {rho_min}\n\tМаксимальная плотность {rho_max}")
-    if out_plot:
-        cmap = plt.get_cmap('viridis')
-        norm = plt.Normalize(rho_min, rho_max)
-        line_colors = cmap(norm(rho_out))
-        plt.scatter(x_out, y_out, color=line_colors)
-        plt.show()
-
 
 def build_neigh(
     particles: List[Particle],
@@ -282,7 +241,7 @@ def density_test2(cfg: Config, out_plot=False) -> None:
     Ns = [64, 128, 256, 512, 1024, 2048, 4096]
     # Ns = np.array([100])
     errs = []
-    dim, L = 1, 10000.0
+    dim, L = 1, 1000.0
     eps = 0.1  # Амплитуда синуса
     k = 2 * np.pi / L  # одна волна на домен
     # При помощи параметра alpha и kappa0 мы контролируем рост соседей
@@ -292,7 +251,7 @@ def density_test2(cfg: Config, out_plot=False) -> None:
     # WendlandC2: kappa0 = 1.3; alpha = 1.0; beta = 0.5
     # Cubic Spline: kappa0 = 3.0; alpha = 1.0; beta = 0.0 + 2 mls_corrector
     # Gauss: kappa0 = 3.0; alpha = 1.0; beta = 0.0 + 1 shepard_corrector
-    kappa0 = 1.3
+    kappa0 = 3.0
     alpha = 1.0
     beta = 0.5
     rho0 = 1000.0  # целевая базовая плотность
@@ -356,5 +315,4 @@ def density_test2(cfg: Config, out_plot=False) -> None:
 if __name__ == "__main__":
     config = get_config("common", print_param=True)
     test_eos_all(config)
-    # density_test2(config, out_plot=True)
-    density_test1(cfg=config, out_plot=True)
+    density_test2(cfg=config, out_plot=True)

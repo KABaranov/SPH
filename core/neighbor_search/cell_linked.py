@@ -6,7 +6,7 @@ import numpy as np
 from SPH.core.particle.particle_dataclass import Particle
 from typing import Sequence
 
-from helpers import minimal_image
+from SPH.core.neighbor_search.helpers import minimal_image
 
 
 def find_neigh_cell_list(particles: List[Particle],

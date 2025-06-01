@@ -14,6 +14,8 @@ class Config:
         self.beta = start_param["beta"] if "beta" in start_param.keys() else 0.0
         self.h = self.kappa0 * self.dx**self.alpha
 
+        self.scenario_name = start_param["scenario"]
+
         self.Lx = start_param["Lx"] if "Lx" in start_param.keys() else self.dx
         self.Ly = start_param["Ly"] if "Ly" in start_param.keys() else self.dx
         self.Lz = start_param["Lz"] if "Lz" in start_param.keys() else self.dx

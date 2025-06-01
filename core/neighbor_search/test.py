@@ -8,8 +8,8 @@ import numpy as np
 from typing import Sequence, List, Callable
 
 from SPH.configs.get_config import get_config
-from bruteforce import find_neigh_bruteforce
-from cell_linked import find_neigh_cell_list
+from SPH.core.neighbor_search.bruteforce import find_neigh_bruteforce
+from SPH.core.neighbor_search.cell_linked import find_neigh_cell_list
 
 
 def ns_time_test1d(particles: List[Particle], cfg: Config,
