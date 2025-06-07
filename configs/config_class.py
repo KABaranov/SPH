@@ -15,6 +15,7 @@ class Config:
         if "dim" not in self.scenario_param.keys():
             raise ValueError("Нужно указать количество измерений (dim) в параметрах сценария")
         self.dim = self.scenario_param["dim"]
+        self.out_plot = bool(self.scenario_param["out_plot"]) if "out_plot" in self.scenario_param.keys() else False
 
         if "pst" not in start_param.keys():
             raise ValueError("Нужно указать pst (pst) в параметрах")

@@ -7,7 +7,8 @@ import matplotlib.pyplot as plt
 
 
 # Тест 1: Однородная решётка 2D
-def density_test1(cfg: Config, out_plot=False) -> None:
+def density_test1(cfg: Config) -> None:
+    out_plot = cfg.out_plot
     print("Проверка расчёта плотности (Тест 1):")
     for param in ["width", "height", "dx"]:
         if param not in cfg.scenario_param.keys():
