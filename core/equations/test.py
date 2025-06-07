@@ -238,7 +238,7 @@ def mls_correction(particles: List[Particle], L: float = -1.0, n_iter: int = 2) 
 def density_test2(cfg: Config, out_plot=False) -> None:
     print("Проверка расчёта плотности (Тест 2):")
     # Ns = np.array([100, 200, 400, 800, 1600])
-    Ns = [64, 128, 256, 512, 1024, 2048, 4096]
+    Ns = [8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096]
     # Ns = np.array([100])
     errs = []
     dim, L = 1, 1000.0
@@ -253,7 +253,7 @@ def density_test2(cfg: Config, out_plot=False) -> None:
     # Gauss: kappa0 = 3.0; alpha = 1.0; beta = 0.0 + 1 shepard_corrector
     kappa0 = 3.0
     alpha = 1.0
-    beta = 0.5
+    beta = 0.0
     rho0 = 1000.0  # целевая базовая плотность
     qmax = 10.0  # Усечение соседей для build_neigh
     kernel = cfg.kernel
