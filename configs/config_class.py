@@ -62,5 +62,4 @@ class Config:
             self.is_periodic = True
         else:
             self.is_periodic = False
-        self.qmax = start_param["qmax"] * self.scenario_param["dx"] \
-            if "qmax" in start_param.keys() else 10.0 * self.scenario_param["dx"]
+        self.qmax = start_param["qmax"] if "qmax" in start_param.keys() else 10.0

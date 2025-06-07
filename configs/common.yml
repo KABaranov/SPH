@@ -12,7 +12,7 @@ corrector_period: 1
 
 # Поиск соседей (bruteforce, cell_linked, kd_tree)
 neighbor_method: "bruteforce"
-qmax: 300.0
+qmax: 1.9
 
 # Общие численные параметры
 gamma: 7.0            # показатель адиабаты в EOS
