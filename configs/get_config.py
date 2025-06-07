@@ -23,12 +23,13 @@ def get_config(name: str = "common", print_param: bool = False) -> Config:
         raise ValueError("Нужно указать сценарий в конфигурации (пример: scenario: 'dam_break')")
     with open(f'{BASE_DIR}/configs/scenario/{start_param["scenario"]}.yml', 'r', encoding='utf-8') as f3:
         scenario_cfg = yaml.safe_load(f3)
+    start_param["scenario_param"] = dict()
     for key in scenario_cfg:
-        start_param[key] = scenario_cfg[key]
+        start_param["scenario_param"][key] = scenario_cfg[key]
 
     if not ("kernel" in start_param.keys()):
         raise ValueError("Нужно указать ядро в конфигурации (пример: kernel: 'wendland_c2')")
-    if not ("dim" in start_param.keys()):
+    if not ("dim" in start_param["scenario_param"].keys()):
         raise ValueError("Нужно указать количество измерений в конфигурации (пример: dim: 1)")
     kernel_name = "Не указано ядро"
     if start_param["kernel"].lower() in ["spline", "cubic_spline"]:
@@ -37,7 +38,8 @@ def get_config(name: str = "common", print_param: bool = False) -> Config:
         kernel_name = "wendland_c2"
     elif start_param["kernel"].lower() in ["gaussian", "gauss"]:
         kernel_name = "gauss"
-    with open(f'{BASE_DIR}/configs/kernels/{kernel_name}/{start_param["dim"]}d.yml', 'r', encoding='utf-8') as f3:
+    with open(f'{BASE_DIR}/configs/kernels/{kernel_name}/{start_param["scenario_param"]["dim"]}d.yml', 'r',
+              encoding='utf-8') as f3:
         kernel_cfg = yaml.safe_load(f3)
     for key in kernel_cfg:
         start_param[key] = kernel_cfg[key]
