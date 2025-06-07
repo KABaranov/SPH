@@ -41,8 +41,9 @@ def get_config(name: str = "common", print_param: bool = False) -> Config:
     with open(f'{BASE_DIR}/configs/kernels/{kernel_name}/{start_param["scenario_param"]["dim"]}d.yml', 'r',
               encoding='utf-8') as f3:
         kernel_cfg = yaml.safe_load(f3)
+    start_param["kernel_param"] = dict()
     for key in kernel_cfg:
-        start_param[key] = kernel_cfg[key]
+        start_param["kernel_param"][key] = kernel_cfg[key]
 
     if not ("pst" in start_param.keys()):
         start_param["pst"] = "none"
