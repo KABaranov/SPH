@@ -4,12 +4,16 @@ scenario: 'density_test1'
 kernel: 'wendland'
 pst: "monaghan"
 viscosity: "artificial"
-neighbor_method: "bruteforce"
 
 # Корректор (mls/shepard/none)
 corrector: "shepard"
 corrector_iter: 1
 corrector_period: 1
+
+# Поиск соседей (bruteforce, cell_linked, kd_tree)
+neighbor_method: "bruteforce"
+is_periodic: True
+qmax: 10000.0
 
 # Общие численные параметры
 gamma: 7.0            # показатель адиабаты в EOS

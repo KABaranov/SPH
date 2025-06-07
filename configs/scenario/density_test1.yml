@@ -3,3 +3,4 @@ width: 0.5
 height: 0.5
 dim: 2
 out_plot: True
+is_periodic: True

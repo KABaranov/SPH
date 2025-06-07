@@ -54,5 +54,11 @@ class Config:
         self.epsilon = start_param["epsilon"] if "epsilon" in start_param.keys() else 0.01
         self.p_floor = start_param["p_floor"] if "p_floor" in start_param.keys() else 0.0
 
-        self.neighbor_method = get_neighbor_search(start_param["neighbor_method"]) \
-            if "neighbor_method" in start_param.keys() else "bruteforce"
+        if "neighbor_method" not in start_param.keys():
+            raise ValueError(f"Нужно метод поиска соседей (neighbor_method) в параметрах")
+        self.neighbor_method = start_param["neighbor_method"]
+        self.neighbor_search = get_neighbor_search(name=self.neighbor_method, dim=self.dim)
+        self.is_periodic = bool(self.scenario_param["is_periodic"]) if (
+                "is_periodic" in self.scenario_param.keys()) else False
+        self.qmax = start_param["qmax"] * self.scenario_param["dx"] \
+            if "qmax" in start_param.keys() else 10.0 * self.scenario_param["dx"]

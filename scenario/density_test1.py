@@ -9,31 +9,31 @@ import matplotlib.pyplot as plt
 # Тест 1: Однородная решётка 2D
 def density_test1(cfg: Config) -> None:
     out_plot = cfg.out_plot
+    neighbor_search = cfg.neighbor_search
     print("Проверка расчёта плотности (Тест 1):")
     for param in ["width", "height", "dx"]:
         if param not in cfg.scenario_param.keys():
             raise ValueError(f"Необходимо указать {param} в параметрах сценария (density_test1)")
     width, height, dx = cfg.scenario_param["width"], cfg.scenario_param["height"], cfg.scenario_param["dx"]
-    qmax = 3 * cfg.h
+    h, dim = cfg.h, cfg.dim
+    if cfg.is_periodic:
+        box = (width, height)
+    else:
+        box = None
+    qmax = cfg.qmax
     kernel = cfg.kernel
     x, y = [i * dx for i in range(int(width // dx) + 2)], [i * dx for i in range(int(height // dx) + 2)]
     particles = []
     for xi in x:
         for yi in y:
             p = Particle(
-                id=len(particles), m=cfg.rho0*(dx**cfg.dim), p=0, x=np.array([xi, yi, 0]),
+                id=len(particles), m=cfg.rho0*(dx**dim), p=0, x=np.array([xi, yi, 0]),
                 drho_dt=0, dv_dt=np.array([0, 0, 0]), state=1, h=cfg.h,
                 neigh=[], neigh_w=[], rho=cfg.rho0, v=np.array([0, 0, 0])
             )
             particles.append(p)
 
-    # build_neigh(particles, h=cfg.h, dim=cfg.dim, box=-1, qmax=10.0, kernel=kernel)
-    for pi in particles:
-        for pj in particles:
-            dr = pj.x - pi.x
-            if np.linalg.norm(dr) <= qmax:
-                pi.neigh.append(pj.id)
-                pi.neigh_w.append(kernel(r=dr, h=pi.h, dim=cfg.dim))
+    neighbor_search(particles, h=h, box=box, qmax=qmax, kernel=kernel)
 
     compute_densities(particles)
 
