@@ -38,12 +38,12 @@ def plot_eos_monotonic(cfg: Config, a: float = 0.0, b: float = 2.0) -> None:
 # Скорость звука для Тейта - это корень частной производной dp/drho
 # Функция проверяет численную производную
 # (Может не выдавать True из-за p_floor)
-def sound_speed(rho: float, cfg: Config):
+def sound_speed(rho: float, cfg: Config) -> float:
     """Аналитический c(ρ) без учёта p_floor."""
     return np.sqrt(cfg.gamma * cfg.B / cfg.rho0) * (rho/cfg.rho0)**((cfg.gamma-1)/2)
 
 
-def test_sound_speed(cfg: Config, delta: float = 1e-6):
+def test_sound_speed(cfg: Config, delta: float = 1e-6) -> bool:
     rho = cfg.rho0 * 1.02            # на 2 % выше, чтобы точно > p_floor
     dpdrho_num = (eos(rho*(1+delta), cfg) - eos(rho*(1-delta), cfg)) / (2*rho*delta)
     c_num = np.sqrt(dpdrho_num)

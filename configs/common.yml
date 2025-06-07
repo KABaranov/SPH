@@ -1,6 +1,6 @@
 # Общий файл конфигурации (обязательный)
 profile: 'water'
-scenario: 'eos_test'
+scenario: 'density_test1'
 kernel: 'wendland'
 pst: "monaghan"
 viscosity: "artificial"
