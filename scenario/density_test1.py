@@ -9,7 +9,10 @@ import matplotlib.pyplot as plt
 # Тест 1: Однородная решётка 2D
 def density_test1(cfg: Config, out_plot=False) -> None:
     print("Проверка расчёта плотности (Тест 1):")
-    width, height, dx = cfg.L[0], cfg.L[1], cfg.dx
+    for param in ["width", "height", "dx"]:
+        if param not in cfg.scenario_param.keys():
+            raise ValueError(f"Необходимо указать {param} в параметрах сценария (density_test1)")
+    width, height, dx = cfg.scenario_param["width"], cfg.scenario_param["height"], cfg.scenario_param["dx"]
     qmax = 3 * cfg.h
     kernel = cfg.kernel
     x, y = [i * dx for i in range(int(width // dx) + 2)], [i * dx for i in range(int(height // dx) + 2)]

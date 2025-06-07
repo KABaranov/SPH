@@ -1,4 +1,4 @@
 dx: 0.02
-Lx: 0.5
-Ly: 0.5
+width: 0.5
+height: 0.5
 dim: 2

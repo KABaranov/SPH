@@ -8,23 +8,36 @@ class Config:
         self,
         start_param: dict,
     ) -> None:
+        if "scenario" not in start_param.keys():
+            raise ValueError("Нужно указать сценарий (scenario) в параметрах")
         self.scenario_name = start_param["scenario"]
         self.scenario_param = start_param["scenario_param"]
+        if "dim" not in self.scenario_param.keys():
+            raise ValueError("Нужно указать количество измерений (dim) в параметрах сценария")
+        self.dim = self.scenario_param["dim"]
 
+        if "pst" not in start_param.keys():
+            raise ValueError("Нужно указать pst (pst) в параметрах")
         self.pst_name = start_param["pst"]
         self.pst_param = start_param["pst_param"]
 
+        if "viscosity" not in start_param.keys():
+            raise ValueError("Нужно указать тип вязкости (viscosity) в параметрах")
         self.viscosity = start_param["viscosity"]
         self.viscosity_param = start_param["viscosity_param"]
 
+        if "kernel" not in start_param.keys():
+            raise ValueError("Нужно указать ядро (kernel) в параметрах")
         self.kernel_name = start_param["kernel"]
         self.kernel_param = start_param["kernel_param"]
+        self.kernel, self.grad = get_kernel(self.kernel_name)
 
-        self.dx = self.scenario_param["dx"] if "dx" in self.scenario_param.keys() else 0.01
-        self.kappa0 = self.kernel_param["kappa0"] if "kappa0" in self.kernel_param.keys() else 1.3
-        self.alpha = self.kernel_param["alpha"] if "alpha" in self.kernel_param.keys() else 1.0
-        self.beta = self.kernel_param["beta"] if "beta" in self.kernel_param.keys() else 0.0
-        self.h = self.kappa0 * self.dx**self.alpha
+        if "dx" not in self.scenario_param.keys():
+            raise ValueError("Нужно указать dx (dx) в параметрах сценария")
+        for param in ["kappa0", "alpha", "beta"]:
+            if param not in self.kernel_param.keys():
+                raise ValueError(f"Нужно указать {param} ({param}) для рассчёта h в параметрах ядра")
+        self.h = self.kernel_param["kappa0"] * self.scenario_param["dx"]**self.kernel_param["alpha"]
 
         self.rho0 = start_param["rho0"] if "rho0" in start_param.keys() else 1000.0
         self.gamma = start_param["gamma"] if "gamma" in start_param.keys() else 7.0
@@ -39,9 +52,6 @@ class Config:
                 raise ValueError("Нужно указать B или c0 для EOS")
         self.epsilon = start_param["epsilon"] if "epsilon" in start_param.keys() else 0.01
         self.p_floor = start_param["p_floor"] if "p_floor" in start_param.keys() else 0.0
-        self.dim = start_param["scenario_param"]["dim"] if "dim" in start_param["scenario_param"].keys() else 2
 
-        self.kernel_name = start_param["kernel"] if "kernel" in start_param.keys() else "gauss"
-        self.kernel, self.grad = get_kernel(self.kernel_name)
         self.neighbor_method = get_neighbor_search(start_param["neighbor_method"]) \
             if "neighbor_method" in start_param.keys() else "bruteforce"
