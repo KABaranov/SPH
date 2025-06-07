@@ -22,7 +22,7 @@ def density_test1(cfg: Config) -> None:
         box = None
     qmax = cfg.qmax
     kernel = cfg.kernel
-    x, y = [i * dx for i in range(int(width // dx) + 2)], [i * dx for i in range(int(height // dx) + 2)]
+    x, y = [i * dx for i in range(int(width // dx) + 1)], [i * dx for i in range(int(width // dx) + 1)]
     particles = []
     for xi in x:
         for yi in y:
@@ -46,7 +46,9 @@ def density_test1(cfg: Config) -> None:
     print(f"\tМинимальная плотность: {rho_min}\n\tМаксимальная плотность {rho_max}")
     if out_plot:
         cmap = plt.get_cmap('viridis')
-        norm = plt.Normalize(rho_min, rho_max)
+        # norm = plt.Normalize(rho_min, rho_max)
+        norm = plt.Normalize(999, 1001)
         line_colors = cmap(norm(rho_out))
         plt.scatter(x_out, y_out, color=line_colors)
+
         plt.show()

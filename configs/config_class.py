@@ -58,7 +58,9 @@ class Config:
             raise ValueError(f"Нужно метод поиска соседей (neighbor_method) в параметрах")
         self.neighbor_method = start_param["neighbor_method"]
         self.neighbor_search = get_neighbor_search(name=self.neighbor_method, dim=self.dim)
-        self.is_periodic = bool(self.scenario_param["is_periodic"]) if (
-                "is_periodic" in self.scenario_param.keys()) else False
+        if "is_periodic" in self.scenario_param.keys() and self.scenario_param["is_periodic"] in [1, "1", True, "True"]:
+            self.is_periodic = True
+        else:
+            self.is_periodic = False
         self.qmax = start_param["qmax"] * self.scenario_param["dx"] \
             if "qmax" in start_param.keys() else 10.0 * self.scenario_param["dx"]
