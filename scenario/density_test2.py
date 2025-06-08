@@ -122,7 +122,7 @@ def density_test2(cfg: Config) -> None:
     out_plot = cfg.out_plot
     print("Проверка расчёта плотности (Тест 2):")
     # Ns = np.array([100, 200, 400, 800, 1600])
-    Ns = [8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096]
+    Ns = [32, 64, 128, 256, 512, 1024, 2048, 4096]
     # Ns = np.array([100])
     errs = []
     dim, L = cfg.dim, cfg.scenario_param["L"]

@@ -1,6 +1,6 @@
 # Общий файл конфигурации (обязательный)
 profile: 'water'
-scenario: 'density_test1'
+scenario: 'density_test2'
 kernel: 'wendland'
 pst: "monaghan"
 viscosity: "artificial"
@@ -11,7 +11,7 @@ corrector_iter: 1
 corrector_period: 1
 
 # Поиск соседей (bruteforce, cell_linked, kd_tree)
-neighbor_method: "bruteforce"
+neighbor_method: "cell_linked"
 qmax: 1.9
 
 # Общие численные параметры

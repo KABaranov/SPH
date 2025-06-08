@@ -46,8 +46,8 @@ def density_test1(cfg: Config) -> None:
     print(f"\tМинимальная плотность: {rho_min}\n\tМаксимальная плотность {rho_max}")
     if out_plot:
         cmap = plt.get_cmap('viridis')
-        # norm = plt.Normalize(rho_min, rho_max)
-        norm = plt.Normalize(999, 1001)
+        norm = plt.Normalize(rho_min, rho_max)
+        # norm = plt.Normalize(999, 1001)
         line_colors = cmap(norm(rho_out))
         plt.scatter(x_out, y_out, color=line_colors)
 

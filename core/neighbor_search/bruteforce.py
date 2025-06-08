@@ -110,7 +110,4 @@ def build_neigh_3d(
 
 
 def bruteforce(dim: int):
-    match dim:
-        case 1: return build_neigh_1d
-        case 2: return build_neigh_2d
-        case 3: return build_neigh_3d
+    return {1: build_neigh_1d, 2: build_neigh_2d, 3: build_neigh_3d}[dim]
