@@ -1,6 +1,8 @@
 import numpy as np
+
 from SPH.core.kernels.get_kernel import get_kernel
 from SPH.core.neighbor_search.get_neigbor_search import get_neighbor_search
+from SPH.core.correctors.get_corrector import get_corrector
 
 
 class Config:
@@ -63,3 +65,11 @@ class Config:
         else:
             self.is_periodic = False
         self.qmax = start_param["qmax"] if "qmax" in start_param.keys() else 10.0
+
+        if "corrector" not in start_param.keys():
+            self.corrector_name = "none"
+        else:
+            self.corrector_name = start_param["corrector"]
+        self.corrector = get_corrector(self.corrector_name)
+        self.corrector_iter = start_param["corrector_iter"] if "corrector_iter" in start_param.keys() else 1
+        self.corrector_period = start_param["corrector_period"] if "corrector_period" in start_param.keys() else 1

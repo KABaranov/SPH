@@ -36,6 +36,9 @@ def density_test1(cfg: Config) -> None:
     neighbor_search(particles, h=h, box=box, qmax=qmax, kernel=kernel)
 
     compute_densities(particles)
+    print(cfg.corrector_name)
+    if not cfg.corrector_name.lower() == "none":
+        cfg.corrector(particles, cfg.corrector_iter)
 
     x_out, y_out, rho_out = [], [], []
     for pi in particles:

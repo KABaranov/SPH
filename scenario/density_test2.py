@@ -9,18 +9,6 @@ import numpy as np
 from typing import Sequence, List, Callable
 
 
-def shepard_filter(particles: List[Particle], n_iter: int = 2) -> None:
-    for _ in range(n_iter):
-        rho_orig = np.array([p.rho for p in particles])
-        for pi in particles:
-            w_sum = rho_sum = 0.0
-            for w, j in zip(pi.neigh_w, pi.neigh):
-                pj = particles[j]
-                w_sum += (pj.m / rho_orig[j]) * w
-                rho_sum += pj.m * w
-            pi.rho = rho_sum / w_sum
-
-
 # Для периодических границ потребуется найти адекватную длину (не 0.98L, а -0.02L)
 def dx_periodic(dx, box_L):
     """вернуть кратчайший вектор со знаком в 1-D периодике"""
@@ -123,7 +111,6 @@ def density_test2(cfg: Config) -> None:
     print("Проверка расчёта плотности (Тест 2):")
     # Ns = np.array([100, 200, 400, 800, 1600])
     Ns = [32, 64, 128, 256, 512, 1024, 2048, 4096]
-    # Ns = np.array([100])
     errs = []
     dim, L = cfg.dim, cfg.scenario_param["L"]
     eps = cfg.scenario_param["eps"]  # Амплитуда синуса
@@ -135,6 +122,8 @@ def density_test2(cfg: Config) -> None:
     # WendlandC2: kappa0 = 1.3; alpha = 1.0; beta = 0.5
     # Cubic Spline: kappa0 = 3.0; alpha = 1.0; beta = 0.0 + 2 mls_corrector
     # Gauss: kappa0 = 3.0; alpha = 1.0; beta = 0.0 + 1 shepard_corrector
+    # UPD: сошёлся на том, что всем ядрам можно ставить kappa0 = 3.0, alpha = 1.0, beta = 0.0, корректоры тут не нужны
+    # если есть условие периодичности
     kappa0 = cfg.kernel_param["kappa0"]
     alpha = cfg.kernel_param["alpha"]
     beta = cfg.kernel_param["beta"]
@@ -166,15 +155,19 @@ def density_test2(cfg: Config) -> None:
                 neigh=[], neigh_w=[], rho=rho0, v=np.array([0, 0, 0])
             )
             particles.append(p)
-        neighbor_search(particles, h, kernel=kernel, box=L, qmax=qmax)
+
+        if cfg.is_periodic:
+            box = L
+        else:
+            box = None
+        neighbor_search(particles, h, kernel=kernel, box=box, qmax=qmax)
         mean_n = np.mean([len(p.neigh) for p in particles])
         print(f"\tN: {N}\th: {h}\tmean_n: {mean_n}")
 
         compute_densities(particles)
-        rho0_list = np.fromiter((p.rho for p in particles), float)
-        shepard_filter(particles, n_iter=1)
-        # mls_correction(particles, L=L, n_iter=2)
-        check_moments(particles, h, rho0_list, L=L)
+        if not cfg.corrector_name.lower() == "none":
+            cfg.corrector(particles, cfg.corrector_iter)
+
         rho_num = np.array([p.rho for p in particles])
         rho_exact = rho0 * (1 + eps * np.sin(k * xs))
         # Вывод для сравнения rho и периодических границ
