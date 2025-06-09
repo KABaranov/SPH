@@ -6,12 +6,12 @@ pst: "monaghan"
 viscosity: "artificial"
 
 # Корректор (mls/shepard/none)
-corrector: "shepard"
+corrector: "mls"
 corrector_iter: 1
 corrector_period: 1
 
 # Поиск соседей (bruteforce, cell_linked, kd_tree)
-neighbor_method: "bruteforce"
+neighbor_method: "cell_linked"
 qmax: 1.9
 
 # Общие численные параметры

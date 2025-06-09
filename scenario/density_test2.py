@@ -33,44 +33,6 @@ def check_moments(parts: List[Particle], h: float, rho0: List[float],
         print(f"|M0-1|={abs(M0-1):.2e},  |M1|/h={abs(M1)/h:.2e}")
 
 
-def mls_density_full(particles: List[Particle], L: float = -1, dim: int = 1) -> None:
-    """
-    MLS-коррекция плотности первого порядка.
-    После вызова у каждой частицы поле rho имеет Δx²-точность
-    независимо от ядра (поддержка 2h, хвосты, усечённый гаусс и т.д.).
-    """
-    for pi in particles:
-        # --- нулевой и первые моменты -------------------
-        M0 = 0.0
-        b  = np.zeros(dim)
-        A  = np.zeros((dim, dim))
-
-        for w, j in zip(pi.neigh_w, pi.neigh):
-            pj   = particles[j]
-            fac  = pj.m / pj.rho          # m_j / ρ_j
-            dx   = pj.x - pi.x            # вектор сдвига
-            if L != 1:
-                dx = dx_periodic(dx, L)
-            M0  += fac * w
-            b   += fac * w * dx
-            A   += fac * w * np.outer(dx, dx)
-
-        # --- решение A a = -b ---------------------------
-        # добавляем малый диагональный шум, если A плохо обусловлена
-        a = np.linalg.solve(A + 1e-14*np.eye(dim), -b)
-
-        # --- скорректированная плотность ----------------
-        num = 0.0
-        for w, j in zip(pi.neigh_w, pi.neigh):
-            dx = particles[j].x - pi.x
-            if L != -1:
-                dx = dx_periodic(dx, L)
-            num += particles[j].m * w * (1.0 + np.dot(a, dx))
-
-        denom = M0 + np.dot(a, b)         # = Σ (m/ρ) W (1 + a·dx)
-        pi.rho = num / denom
-
-
 def mls_correction(particles: List[Particle], L: float = -1.0, n_iter: int = 2) -> None:
     """
     L - длина рассматриваемой зоны (для периодических границ
@@ -167,6 +129,7 @@ def density_test2(cfg: Config) -> None:
         compute_densities(particles)
         if not cfg.corrector_name.lower() == "none":
             cfg.corrector(particles, cfg.corrector_iter)
+        # mls_correction(particles, L=L, n_iter=cfg.corrector_iter)
 
         rho_num = np.array([p.rho for p in particles])
         rho_exact = rho0 * (1 + eps * np.sin(k * xs))
