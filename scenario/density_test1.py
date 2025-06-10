@@ -37,7 +37,7 @@ def density_test1(cfg: Config) -> None:
 
     compute_densities(particles)
     print(cfg.corrector_name)
-    if not cfg.corrector_name.lower() == "none":
+    if cfg.corrector_name.lower() != "none":
         cfg.corrector(particles, cfg.corrector_iter)
 
     x_out, y_out, rho_out = [], [], []
@@ -50,7 +50,7 @@ def density_test1(cfg: Config) -> None:
     if out_plot:
         cmap = plt.get_cmap('viridis')
         norm = plt.Normalize(rho_min, rho_max)
-        # norm = plt.Normalize(999, 1001)
+        # norm = plt.Normalize(900, 1000)
         line_colors = cmap(norm(rho_out))
         plt.scatter(x_out, y_out, color=line_colors)
 

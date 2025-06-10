@@ -10,9 +10,9 @@ from typing import Sequence, List, Callable
 
 
 # Для периодических границ потребуется найти адекватную длину (не 0.98L, а -0.02L)
-def dx_periodic(dx, box_L):
+def dx_periodic(dx: float, box_L: float) -> float:
     """вернуть кратчайший вектор со знаком в 1-D периодике"""
-    if dx >  0.5 * box_L:
+    if dx > 0.5 * box_L:
         dx -= box_L
     elif dx < -0.5 * box_L:
         dx += box_L
@@ -93,9 +93,8 @@ def density_test2(cfg: Config) -> None:
         print(f"\tN: {N}\th: {h}\tmean_n: {mean_n}")
 
         compute_densities(particles)
-        if not cfg.corrector_name.lower() == "none":
+        if cfg.corrector_name.lower() != "none":
             cfg.corrector(particles, cfg.corrector_iter)
-        # mls_correction(particles, L=L, n_iter=cfg.corrector_iter)
 
         rho_num = np.array([p.rho for p in particles])
         rho_exact = rho0 * (1 + eps * np.sin(k * xs))

@@ -1,12 +1,12 @@
 # Общий файл конфигурации (обязательный)
 profile: 'water'
-scenario: 'density_test2'
+scenario: 'density_test1'
 kernel: 'wendland'
 pst: "monaghan"
 viscosity: "artificial"
 
 # Корректор (mls/shepard/none)
-corrector: "mls"
+corrector: "none"
 corrector_iter: 1
 corrector_period: 1
 
