@@ -26,7 +26,7 @@ class Config:
 
         if "viscosity" not in start_param.keys():
             raise ValueError("Нужно указать тип вязкости (viscosity) в параметрах")
-        self.viscosity = start_param["viscosity"]
+        self.viscosity_name = start_param["viscosity"]
         self.viscosity_param = start_param["viscosity_param"]
 
         if "kernel" not in start_param.keys():
@@ -53,7 +53,6 @@ class Config:
                 self.B = self.rho0 * self.c0 ** 2.0 / self.gamma
             else:
                 raise ValueError("Нужно указать B или c0 для EOS")
-        self.epsilon = start_param["epsilon"] if "epsilon" in start_param.keys() else 0.01
         self.p_floor = start_param["p_floor"] if "p_floor" in start_param.keys() else 0.0
 
         if "neighbor_method" not in start_param.keys():

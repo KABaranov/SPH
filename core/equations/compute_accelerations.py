@@ -1,8 +1,9 @@
 import numpy as np
 from typing import List, Optional
-from ..particle.particle_dataclass import Particle
+
 from SPH.configs.config_class import Config
-from .calculate_viscosity import artificial_viscosity
+from SPH.core.particle.particle_dataclass import Particle
+from SPH.core.viscosity.get_viscosity import get_viscosity
 
 
 # ------------------------------------------------------------------
@@ -25,7 +26,7 @@ def compute_accelerations(cfg: Config,
             pij_term = pi.p / (pi.rho ** 2.0) + pj.p / (pj.rho ** 2.0)
 
             # Искусственная вязкость
-            visc = artificial_viscosity(pi, pj, rij, cfg.kernel)
+            visc = get_viscosity(cfg.viscosity_name)(cfg, pi, pj, rij)
 
             acc -= pj.m * (pij_term + visc) * grad_w
 
