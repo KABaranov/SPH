@@ -30,6 +30,7 @@ class Particle:
     h: float
     neigh: List[int]
     neigh_w: List[float]
+    grad_w: List[np.ndarray]
     drho_dt: float
     dv_dt: np.ndarray
     state: int

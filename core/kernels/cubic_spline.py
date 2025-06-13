@@ -1,82 +1,80 @@
-from __future__ import annotations
-
 import numpy as np
-from typing import Sequence
 
 
-def cubic_spline_kernel(r: Sequence[float] | float | int, h: float, dim: int = 2):
+def cubic_spline_kernel(r: np.ndarray, h: float, dim: int) -> float:
     """
-    Кубический B-сплайн-ядро W(|r|,h) с поддержкой 2 h.
+    Cubic spline kernel for 1D, 2D, or 3D, always accepts r as length-3 vector.
 
     Parameters
     ----------
-    r   : (..., dim) array_like — вектор расстояний r = x_a − x_b
-    h   : float                — сглаживающий радиус
-    dim : {1,2,3}              — размерность пространства
+    r   : ndarray, shape (3,)  - displacement vector between two particles
+    h   : float               - smoothing length
+    dim : int                 - dimensionality (1, 2, or 3)
 
     Returns
     -------
-    W   : ndarray — значение ядра
+    W : float                 - kernel value
     """
-    # σd — коэффициенты нормировки (∫WdV = 1)
-    sigma = {1: 2 / 3,
-             2: 10 / (7 * np.pi),
-             3: 1 / np.pi}[dim] / np.pow(h, dim)
-    if np.isscalar(r):
-        q = r / h
+    if dim not in (1, 2, 3):
+        raise ValueError(f"dim must be 1, 2, or 3, got {dim}")
+    r3 = np.asarray(r, dtype=float)
+    if r3.shape != (3,):
+        raise ValueError(f"Input r must have shape (3,), got {r3.shape}")
+    # consider only first dim components
+    r_vec = r3[:dim]
+    r_norm = np.linalg.norm(r_vec)
+    q = r_norm / h
+    # normalization constants for cubic spline
+    sigma_map = {1: 2/3, 2: 10/(7*np.pi), 3: 1/np.pi}
+    sigma = sigma_map[dim] / (h**dim)
+    # kernel definition support for q <= 2
+    if q < 1.0:
+        W = sigma * (1 - 1.5*q**2 + 0.75*q**3)
+    elif q < 2.0:
+        W = sigma * 0.25 * (2 - q)**3
     else:
-        r = np.asarray(r, dtype=float)
-        q = np.linalg.norm(r, axis=-1) / h  # q = r/h
-
-    kernel = np.zeros_like(q)
-
-    mask1 = q < 1.0
-    mask2 = (q >= 1.0) & (q < 2.0)
-
-    kernel[mask1] = sigma * (1 - 1.5*q[mask1]**2 + 0.75*q[mask1]**3)
-    kernel[mask2] = sigma * 0.25 * (2 - q[mask2])**3
-
-    return kernel
+        W = 0.0
+    return W
 
 
-def cubic_spline_grad(r: Sequence[float] | float | int, h: float, dim: int = 2):
+def cubic_spline_grad(r: np.ndarray, h: float, dim: int) -> np.ndarray:
     """
-    Градиент кубического сплайна ∇_r W.
+    Gradient of cubic spline kernel for 1D, 2D, or 3D.
+
+    Parameters
+    ----------
+    r   : ndarray, shape (3,)  - displacement vector between two particles
+    h   : float               - smoothing length
+    dim : int                 - dimensionality (1, 2, or 3)
 
     Returns
     -------
-    gradW : ndarray — (…)×dim массив (такая же форма, как r)
+    gradW : ndarray, shape (3,) - gradient vector
     """
-    # σd — коэффициенты нормировки (∫WdV = 1)
-    sigma = {1: 2 / 3,
-             2: 10 / (7 * np.pi),
-             3: 1 / np.pi}[dim] / np.pow(h, dim)
-    r = np.asarray(r, dtype=float)
-    q = np.linalg.norm(r, axis=-1, keepdims=True) / h
-    if q == 0:
-        return np.zeros(dim, dtype=float)
-
-    dWdq = np.zeros_like(q)
-
-    mask1 = q < 1.0
-    mask2 = (q >= 1.0) & (q < 2.0)
-
-    dWdq[mask1] = sigma * (-3*q[mask1] + 2.25*q[mask1]**2)  # dW/dq
-    dWdq[mask2] = sigma * (-0.75*(2 - q[mask2])**2)
-
-    # ∇W = (dW/dq)/(h) · r/|r|
-    return dWdq / (h*q) * r
-
-
-def discrete_M0(kernel, h, dx):
-    q = np.arange(-2*np.ceil(h/dx), 2*np.ceil(h/dx)+1)  # узлы
-    W = [kernel(np.abs(qi*dx), h, dim=1) for qi in q]
-    return np.sum(W)*dx
-
-
-if __name__ == "__main__":
-    dx = 1 / 2048
-    for kappa in (1.3, 1.4, 1.5, 1.6):
-        h = kappa*dx     # dx = 1/N
-        print(kappa, discrete_M0(cubic_spline_kernel, h, dx))
-
+    if dim not in (1, 2, 3):
+        raise ValueError(f"dim must be 1, 2, or 3, got {dim}")
+    r3 = np.asarray(r, dtype=float)
+    if r3.shape != (3,):
+        raise ValueError(f"Input r must have shape (3,), got {r3.shape}")
+    # consider only first dim components
+    r_vec = r3[:dim]
+    r_norm = np.linalg.norm(r_vec)
+    q = r_norm / h
+    # zero gradient for r_norm=0 to avoid division by zero
+    if r_norm == 0 or q > 2.0:
+        return np.zeros(3, dtype=float)
+    # normalization constants
+    sigma_map = {1: 2/3, 2: 10/(7*np.pi), 3: 1/np.pi}
+    sigma = sigma_map[dim] / (h**dim)
+    # compute dW/dq
+    if q < 1.0:
+        dW_dq = sigma * (-3*q + 2.25*q**2)
+    else:  # 1 <= q < 2.0
+        dW_dq = sigma * (-0.75 * (2 - q)**2)
+    # chain rule: dW/dr = dW/dq * (1/h)
+    dW_dr = dW_dq / h
+    # directional gradient
+    grad = np.zeros(3, dtype=float)
+    grad_dir = dW_dr * (r_vec / r_norm)
+    grad[:dim] = grad_dir
+    return grad

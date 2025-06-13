@@ -9,8 +9,8 @@ from typing import Callable, List
 
 def plot_kernel(kernel_func: Callable, h: float = 1.0, dim: int = 3,
                 rcut: float = 3.0, n: int = 400):
-    q = np.linspace([-rcut], rcut, n)
-    kernel_list = [kernel_func(qi, h, dim=dim) for qi in q]
+    q = np.linspace([-rcut, rcut, n])
+    kernel_list = [kernel_func([qi, 0, 0], h, dim=dim) for qi in q]
     plt.figure()
     plt.plot(q, kernel_list)
     plt.xlabel(r'$q = r/h$')
@@ -21,7 +21,7 @@ def plot_kernel(kernel_func: Callable, h: float = 1.0, dim: int = 3,
 
 def plot_grad(grad_func: Callable, h: float = 1.0, dim: int = 3,
               rcut: float = 3.0, n: int = 400):
-    q = np.linspace([-rcut], rcut, n)
+    q = np.linspace([-rcut, 0, 0], rcut, n)
     grad_list = [grad_func(qi, h, dim=dim) for qi in q]
     plt.figure()
     plt.plot(q, grad_list)
@@ -33,12 +33,12 @@ def plot_grad(grad_func: Callable, h: float = 1.0, dim: int = 3,
 
 def plot_many_kernel(kernel_dict: dict, h: float = 1.0,
                      dim: int = 3, rcut: float = 3.0, n: int = 400):
-    q = np.linspace([-rcut], rcut, n)
+    q = np.linspace(-rcut, rcut, n)
     plt.figure()
     kernel_names = kernel_dict.keys()
     for kernel_name in kernel_names:
         kernel_func = kernel_dict[kernel_name]
-        kernel_i = [kernel_func(qi, h, dim=dim) for qi in q]
+        kernel_i = [kernel_func([qi, 0, 0], h, dim=dim) for qi in q]
         plt.plot(q, kernel_i)
     plt.legend(kernel_names)
     plt.xlabel(r'$q = r/h$')
@@ -49,13 +49,13 @@ def plot_many_kernel(kernel_dict: dict, h: float = 1.0,
 
 def plot_many_gradients(grad_dict: dict, h: float = 1.0,
                         dim: int = 3, rcut: float = 3.0, n: int = 400):
-    q = np.linspace([-rcut], rcut, n)
+    q = np.linspace(-rcut, rcut, n)
     plt.figure()
     grad_names = grad_dict.keys()
     for grad_name in grad_names:
         grad_func = grad_dict[grad_name]
-        grad_i = [grad_func(qi, h, dim=dim) for qi in q]
-        plt.plot(q, grad_i)
+        grad_i = [grad_func([qi, 0, 0], h, dim=dim) for qi in q]
+        plt.plot(q, [grad_ij[0] for grad_ij in grad_i])
     plt.legend(grad_names)
     plt.xlabel(r'$q = r/h$')
     plt.ylabel(r'$W(q)$')
@@ -91,7 +91,7 @@ def kernel_m0(kernel: Callable, h: float, *, dim: int = 1,
         Численно полученный нулевой момент.
     """
     r = np.linspace(0.0, k_cut * h, n, dtype=float)
-    w = [kernel([ri], h, dim=dim) for ri in r]
+    w = [kernel([ri, 0, 0], h, dim=dim) for ri in r]
     if dim == 1:
         integrand = w
         M0 = 2.0 * np.trapezoid(integrand, r)
@@ -116,12 +116,14 @@ if __name__ == "__main__":
     print(kernel_m0(wendland_c2_kernel, h=h))
     print(kernel_m0(gaussian_kernel, h=h))
     print(kernel_m0(cubic_spline_kernel, h=h))
-    kernels = {"Ядро Гаусса": gaussian_kernel,
-               "Кубический Сплайн": cubic_spline_kernel,
-               "Вендланд C2": wendland_c2_kernel}
-    gradients = {"Ядро Гаусса": gaussian_grad,
-                 "Кубический Сплайн": cubic_spline_grad,
-                 "Вендланд C2": wendland_c2_grad}
+    kernels = {
+        "Ядро Гаусса": gaussian_kernel,
+        "Кубический Сплайн": cubic_spline_kernel,
+        "Вендланд C2": wendland_c2_kernel}
+    gradients = {
+        "Ядро Гаусса": gaussian_grad,
+        "Кубический Сплайн": cubic_spline_grad,
+        "Вендланд C2": wendland_c2_grad}
     plot_many_kernel(kernels, dim=1)
     plot_many_gradients(gradients, dim=1)
     plt.show()

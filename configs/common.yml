@@ -1,6 +1,6 @@
 # Общий файл конфигурации (обязательный)
 profile: 'water'
-scenario: 'density_test1'
+scenario: 'square_drop'
 kernel: 'wendland'
 pst: "monaghan"
 viscosity: "artificial"
@@ -11,7 +11,7 @@ corrector_iter: 1
 corrector_period: 1
 
 # Поиск соседей (bruteforce, cell_linked, kd_tree)
-neighbor_method: "cell_linked"
+neighbor_method: "bruteforce"
 qmax: 1.9
 
 # Общие численные параметры
@@ -19,4 +19,4 @@ gamma: 7.0            # показатель адиабаты в EOS
 
 # Шаг времени и суммарное время моделирования
 dt: 0.001
-total_time: 2.0
+total_time: 0.2

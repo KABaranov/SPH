@@ -1,45 +1,40 @@
 from SPH.configs.config_class import Config
 from SPH.core.particle.particle_dataclass import Particle
 from SPH.core.equations.compute_densities import compute_densities
+from SPH.core.step_sph import step_sph
 
 import numpy as np
 import matplotlib.pyplot as plt
+from tqdm import tqdm
 
 
-# Тест 1: Однородная решётка 2D
-def density_test1(cfg: Config) -> None:
+# ======================================
+# Квадратная капля
+# ======================================
+def square_drop(cfg: Config) -> None:
+    print("Квадратная капля:")
+    iterations = int(cfg.total_time // cfg.dt)
     out_plot = cfg.out_plot
-    neighbor_search = cfg.neighbor_search
-    print("Проверка расчёта плотности (Тест 1):")
     for param in ["width", "height", "dx"]:
         if param not in cfg.scenario_param.keys():
-            raise ValueError(f"Необходимо указать {param} в параметрах сценария (density_test1)")
+            raise ValueError(f"Необходимо указать {param} в параметрах сценария (square_drop)")
     width, height, dx = cfg.scenario_param["width"], cfg.scenario_param["height"], cfg.scenario_param["dx"]
     h, dim = cfg.h, cfg.dim
-    if cfg.is_periodic:
-        box = (width, height)
-    else:
-        box = None
-    qmax = cfg.qmax
-    kernel = cfg.kernel
-    grad_kernel = cfg.grad
+    box = (width, height) if cfg.is_periodic else None
+
     x, y = [i * dx for i in range(int(width // dx) + 1)], [i * dx for i in range(int(width // dx) + 1)]
     particles = []
     for xi in x:
         for yi in y:
             p = Particle(
-                id=len(particles), m=cfg.rho0*(dx**dim), p=0, x=np.array([xi, yi, 0]),
+                id=len(particles), m=cfg.rho0 * (dx ** dim), p=0, x=np.array([xi, yi, 0]),
                 drho_dt=0, dv_dt=np.array([0, 0, 0]), state=1, h=cfg.h, neigh=[],
-                neigh_w=[], grad_w=[], rho=cfg.rho0, v=np.array([0, 0, 0])
+                grad_w=[], neigh_w=[], rho=cfg.rho0, v=np.array([0, 0, 0])
             )
             particles.append(p)
 
-    neighbor_search(particles, h=h, box=box, qmax=qmax, kernel=kernel, grad_kernel=grad_kernel)
-
-    compute_densities(particles)
-    print(cfg.corrector_name)
-    if cfg.corrector_name.lower() != "none":
-        cfg.corrector(particles, cfg.corrector_iter)
+    for time in tqdm(range(iterations)):
+        step_sph(cfg=cfg, particles=particles, dt=cfg.dt, box=box)
 
     x_out, y_out, rho_out = [], [], []
     for pi in particles:

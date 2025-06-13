@@ -13,14 +13,15 @@ def compute_accelerations(cfg: Config,
                           particles: List[Particle],
                           external_force: Optional[np.ndarray] = None,) -> None:
     if external_force is None:
-        external_force = np.zeros_like(particles[0].v)
+        external_force = np.zeros_like(particles[0].v, dtype=float)
 
     for i, pi in enumerate(particles):
-        acc = np.zeros_like(pi.v)
-        for j in pi.neigh:
+
+        acc = np.zeros_like(pi.v, dtype=float)
+        for jdx, j in enumerate(pi.neigh):
             pj = particles[j]
             rij = pi.x - pj.x
-            grad_w = cfg.grad(rij)
+            grad_w = pi.grad_w[jdx]
 
             # Давление (symmetric form)
             pij_term = pi.p / (pi.rho ** 2.0) + pj.p / (pj.rho ** 2.0)
@@ -28,6 +29,6 @@ def compute_accelerations(cfg: Config,
             # Искусственная вязкость
             visc = get_viscosity(cfg.viscosity_name)(cfg, pi, pj, rij)
 
-            acc -= pj.m * (pij_term + visc) * grad_w
+            acc -= grad_w * pj.m * (pij_term + visc)
 
         pi.dv_dt = acc + external_force

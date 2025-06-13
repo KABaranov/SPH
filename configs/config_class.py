@@ -72,3 +72,6 @@ class Config:
         self.corrector = get_corrector(self.corrector_name)
         self.corrector_iter = start_param["corrector_iter"] if "corrector_iter" in start_param.keys() else 1
         self.corrector_period = start_param["corrector_period"] if "corrector_period" in start_param.keys() else 1
+
+        self.total_time = start_param["total_time"] if "total_time" in start_param.keys() else 2.0
+        self.dt = start_param["dt"] if "dt" in start_param.keys() else 0.001
