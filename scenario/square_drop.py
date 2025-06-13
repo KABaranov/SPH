@@ -53,6 +53,7 @@ def square_drop(cfg: Config) -> None:
 
     # Рисуем первый кадр
     fig, ax = plt.subplots()
+    ax.set_aspect('equal')
     plt.subplots_adjust(bottom=0.2)
     sc = ax.scatter(frames[0][0], frames[0][1], c=frames[0][2], cmap='viridis',
                     vmin=rho_min, vmax=rho_max)
