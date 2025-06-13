@@ -7,7 +7,7 @@ from SPH.configs.config_class import Config
 # ------------------------------------------------------------------
 # Континуитет: dρ/dt
 # ------------------------------------------------------------------
-def compute_drho_dt(cfg: Config, particles: List[Particle], dim: int = 2) -> None:
+def compute_drho_dt(particles: List[Particle]) -> None:
     for i, pi in enumerate(particles):
         drho = 0.0
         for jdx, j in enumerate(pi.neigh):

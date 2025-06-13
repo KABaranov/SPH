@@ -6,9 +6,9 @@ pst: "monaghan"
 viscosity: "artificial"
 
 # Корректор (mls/shepard/none)
-corrector: "none"
+corrector: "mls"
 corrector_iter: 1
-corrector_period: 1
+corrector_period: 10
 
 # Поиск соседей (bruteforce, cell_linked, kd_tree)
 neighbor_method: "bruteforce"

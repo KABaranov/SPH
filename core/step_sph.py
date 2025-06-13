@@ -4,6 +4,7 @@ from typing import List, Sequence
 from SPH.configs.config_class import Config
 from SPH.core.particle.particle_dataclass import Particle
 from SPH.core.equations.compute_drho_dt import compute_drho_dt
+from SPH.core.equations.compute_densities import compute_densities
 from SPH.core.equations.eos import eos
 from SPH.core.equations.compute_accelerations import compute_accelerations
 from SPH.core.time_integrator.euler_cromer import euler_cromer
@@ -14,11 +15,13 @@ def step_sph(cfg: Config, particles: List[Particle], dt: float, box: Sequence[fl
     cfg.neighbor_search(particles, h=cfg.h, kernel=cfg.kernel, grad_kernel=cfg.grad, box=box, qmax=cfg.qmax)
 
     # 1. Рассчитать dρ/dt (континуитет)
-    compute_drho_dt(cfg=cfg, particles=particles, dim=cfg.scenario_param["dim"])
+    compute_drho_dt(particles=particles)
 
     # 2. Интегрировать плотность
     for p in particles:
         p.rho += p.drho_dt * dt
+
+    # compute_densities(particles=particles)
 
     # 3. Рассчитать давление через уравнение состояния
     for p in particles:

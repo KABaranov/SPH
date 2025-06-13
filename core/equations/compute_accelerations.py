@@ -25,10 +25,10 @@ def compute_accelerations(cfg: Config,
 
             # Давление (symmetric form)
             pij_term = pi.p / (pi.rho ** 2.0) + pj.p / (pj.rho ** 2.0)
+            # print(pi.p, pi.rho, pj.p, pj.rho)
 
             # Искусственная вязкость
             visc = get_viscosity(cfg.viscosity_name)(cfg, pi, pj, rij)
-
             acc -= grad_w * pj.m * (pij_term + visc)
 
         pi.dv_dt = acc + external_force
