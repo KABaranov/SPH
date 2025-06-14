@@ -20,6 +20,9 @@ class Particle:
         drho_dt: временная производная плотности
         dv_dt: временная производная скорости (ускорение)
         state: 0 - твёрдый, 1 - жидкий, 2 - газ
+        T: температура частицы
+        k: теплопроводность материала частицы
+        c: удельная теплоёмкость
     """
     id: int
     m: float
@@ -34,3 +37,6 @@ class Particle:
     drho_dt: float
     dv_dt: np.ndarray
     state: int
+    T: float
+    k: float
+    c: float
