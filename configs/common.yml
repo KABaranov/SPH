@@ -2,7 +2,7 @@
 profile: 'water'
 scenario: 'square_drop'
 kernel: 'wendland'
-pst: "oger"
+pst: "none"
 viscosity: "artificial"
 
 # Корректор (mls/shepard/none)

@@ -8,8 +8,7 @@ from SPH.core.equations.compute_densities import compute_densities
 from SPH.core.equations.eos import eos
 from SPH.core.equations.compute_accelerations import compute_accelerations
 from SPH.core.time_integrator.euler_cromer import euler_cromer
-from SPH.core.pst.monaghan import apply_pst_monaghan
-from SPH.core.pst.oger import apply_pst_oger
+from SPH.core.pst.get_pst import get_pst
 
 
 def step_sph(cfg: Config, particles: List[Particle], dt: float, box: Sequence[float] | float | None = None,):
@@ -38,8 +37,8 @@ def step_sph(cfg: Config, particles: List[Particle], dt: float, box: Sequence[fl
     # 5. Интегрировать скорость и позицию (Euler–Cromer)
     euler_cromer(particles=particles, dt=dt)
 
-    # apply_pst_monaghan(cfg=cfg, particles=particles)
-    apply_pst_oger(cfg=cfg, particles=particles)
+    if cfg.pst_name != "none":
+        get_pst(cfg.pst_name)(cfg=cfg, particles=particles)
 
     # # 6. (опционально) Интегрировать температуру/энтальпию (теплопроводность)
     # if cfg.solve_heat:

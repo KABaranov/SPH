@@ -45,7 +45,7 @@ def get_config(name: str = "common", print_param: bool = False) -> Config:
     for key in kernel_cfg:
         start_param["kernel_param"][key] = kernel_cfg[key]
 
-    if not ("pst" in start_param.keys()):
+    if not ("pst" in start_param.keys()) or start_param["pst"].lower() == "none":
         start_param["pst"] = "none"
     else:
         with open(f'{BASE_DIR}/configs/pst/{start_param["pst"]}.yml', 'r', encoding='utf-8') as f3:

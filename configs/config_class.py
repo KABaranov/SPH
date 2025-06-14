@@ -22,7 +22,8 @@ class Config:
         if "pst" not in start_param.keys():
             raise ValueError("Нужно указать pst (pst) в параметрах")
         self.pst_name = start_param["pst"]
-        self.pst_param = start_param["pst_param"]
+        if self.pst_name.lower() != "none":
+            self.pst_param = start_param["pst_param"]
 
         if "viscosity" not in start_param.keys():
             raise ValueError("Нужно указать тип вязкости (viscosity) в параметрах")
