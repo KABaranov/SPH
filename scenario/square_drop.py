@@ -26,6 +26,8 @@ def square_drop(cfg: Config) -> None:
     particles = []
     for xi in x_vals:
         for yi in y_vals:
+            # if xi in [x_vals[0], x_vals[-1]] and yi in [y_vals[0], y_vals[-1]]:
+            #     continue
             p = Particle(
                 id=len(particles), m=cfg.rho0 * dx ** cfg.dim, p=0,
                 x=np.array([xi, yi, 0.]), drho_dt=0,
@@ -38,6 +40,11 @@ def square_drop(cfg: Config) -> None:
     frames = []  # list of (x, y, rho)
     cfg.neighbor_search(particles=particles, h=cfg.h, kernel=cfg.kernel, grad_kernel=cfg.grad, box=box, qmax=cfg.qmax)
     compute_densities(particles=particles)
+    xs = np.array([p.x[0] for p in particles])
+    ys = np.array([p.x[1] for p in particles])
+    rhos = np.array([p.rho for p in particles])
+    frames.append((xs, ys, rhos))
+
     for step in tqdm(range(iterations)):
         if cfg.corrector and step % cfg.corrector_period == 0:
             cfg.corrector(particles=particles, n_iter=cfg.corrector_iter)
@@ -55,14 +62,14 @@ def square_drop(cfg: Config) -> None:
     fig, ax = plt.subplots()
     ax.set_aspect('equal')
     plt.subplots_adjust(bottom=0.2)
-    sc = ax.scatter(frames[0][0], frames[0][1], c=frames[0][2], cmap='viridis',
+    sc = ax.scatter(frames[-1][0], frames[-1][1], c=frames[-1][2], cmap='viridis',
                     vmin=rho_min, vmax=rho_max)
     ax.set_title('Step 0')
     plt.colorbar(sc, ax=ax, label='rho')
 
     # Добавляем слайдер
     ax_slider = plt.axes([0.2, 0.05, 0.6, 0.03])
-    slider = Slider(ax_slider, 'Step', 0, iterations - 1, valinit=0, valfmt='%0.0f')
+    slider = Slider(ax_slider, 'Step', 0, iterations - 1, valinit=iterations, valfmt='%0.0f')
 
     def update(val):
         idx = int(slider.val)

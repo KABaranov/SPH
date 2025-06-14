@@ -1,34 +1,42 @@
-import numpy as np
 from typing import List
-from sph.pst.base import IPST
-from sph.core.particle import Particle
-from sph.core.kernels import Kernel
+import numpy as np
+
+from SPH.configs.config_class import Config
+from SPH.core.particle.particle_dataclass import Particle
 
 
-class OgerPST(IPST):
+def apply_pst_oger(cfg: Config, particles: List[Particle]) -> None:
     """
-    ALE-версия техники сдвига частиц по Огеру.
-    δu_i = -β * h^2 * ∇C_i, где ∇C_i = Σ_j ∇W_ij
-    Коррекция скорости: v_i += δu_i
-
-    Args:
-        beta: параметр PST Огера
-        kernel: экземпляр SPH-ядер для вычисления градиента
+    Реализует смещение частиц по PST Оже (диффузия частиц).
+    particles – список Particle.
     """
-    def __init__(self, beta: float = 0.01, kernel: Kernel = None):
-        if kernel is None:
-            raise ValueError("OgerPST требует указать ядро для вычисления ∇W")
-        self.beta = beta
-        self.kernel = kernel
+    if "D" not in cfg.pst_param.keys():
+        raise ValueError("Укажите D в параметрах pst/oger")
+    D = cfg.pst_param["D"]
+    N = len(particles)
+    # Шаг 1, 2: посчитать сглаженную концентрацию (число соседей) для каждой частицы + градиенты
+    C = np.zeros(N)  # массив для хранения концентраций n_i
+    gradC = [np.zeros_like(p.x) for p in particles]  # лист векторов нулевых
+    for i, pi in enumerate(particles):
+        for j, wj, grad_wj in zip(pi.neigh, pi.neigh_w, pi.grad_w):
+            if i == j:
+                continue
+            C[i] += wj
+            gradC[i] += grad_wj
+    # (Если хотим более физично: можно C[i] не учитывать саму частицу i,
+    # но W(0) обычно конечен для ядра, так что можно и учитывать, это просто добавит константу.)
 
-    def apply(self, particles: List[Particle], dt: float) -> None:
-        # Вычисляем и применяем смещение для каждой частицы
-        h2 = self.kernel.h ** 2
-        for pi in particles:
-            gradC = np.zeros_like(pi.v)
-            # ∇C = Σ_j ∇W(x_i - x_j)
-            for j_idx in pi.neigh:
-                pj = particles[j_idx]
-                gradC += self.kernel.grad_W(pi.x - pj.x)
-            delta_u = - self.beta * h2 * gradC
-            pi.v += delta_u
+    # Шаг 3: вычислить и применить смещения
+    shifts = [np.zeros_like(p.x) for p in particles]
+    for i, pi in enumerate(particles):
+        # Расчёт величины сдвига. Берём -D * gradC (минус, чтобы от высокого C к низкому)
+        # Учтём dt: если D задан без учета dt, то умножим на dt внутри.
+        shifts[i] = - D * gradC[i] * cfg.dt
+        # Можно добавить логику ограничения на свободной поверхности:
+        # Например, если p_i.detected_as_surface:
+        #     обнулить нормальную составляющую shifts[i].
+        # Но здесь пропустим эту деталь для краткости.
+
+    # Обновляем позиции всех частиц одновременно
+    for i, pi in enumerate(particles):
+        pi.x += shifts[i]
