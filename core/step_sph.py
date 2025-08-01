@@ -11,18 +11,20 @@ from SPH.core.time_integrator.euler_cromer import euler_cromer
 from SPH.core.pst.get_pst import get_pst
 
 
-def step_sph(cfg: Config, particles: List[Particle], dt: float, box: Sequence[float] | float | None = None,):
+def step_sph(cfg: Config, particles: List[Particle], dt: float,
+             step: int, box: Sequence[float] | float | None = None,):
     # 0. Обновить список соседей
     cfg.neighbor_search(particles, h=cfg.h, kernel=cfg.kernel, grad_kernel=cfg.grad, box=box, qmax=cfg.qmax)
 
-    # # 1. Рассчитать dρ/dt (континуитет)
-    # compute_drho_dt(particles=particles)
-    #
-    # # 2. Интегрировать плотность
-    # for p in particles:
-    #     p.rho += p.drho_dt * dt
+    # 1. Рассчитать dρ/dt (континуитет)
+    compute_drho_dt(particles=particles)
 
-    compute_densities(particles=particles)
+    # 2. Интегрировать плотность
+    for p in particles:
+        p.rho += p.drho_dt * dt
+
+    if step % 5 == 0:
+        compute_densities(particles=particles)
 
     # 3. Рассчитать давление через уравнение состояния
     for p in particles:

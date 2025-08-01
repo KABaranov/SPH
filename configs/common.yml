@@ -2,22 +2,22 @@
 profile: 'water'
 scenario: 'square_drop'
 kernel: 'wendland'
-pst: "none"
+pst: "oger"
 viscosity: "artificial"
 
 # Корректор (mls/shepard/none)
 corrector: "none"
 corrector_iter: 1
-corrector_period: 40
+corrector_period: 10
 
 # Поиск соседей (bruteforce, cell_linked, kd_tree)
-neighbor_method: "bruteforce"
+neighbor_method: "cell_linked"
 qmax: 1.9
 
 # Общие численные параметры
 gamma: 7.0            # показатель адиабаты в EOS
 
-# Параметры температуры
+# Расчёт тепла
 solve_heat: False
 
 # Шаг времени и суммарное время моделирования

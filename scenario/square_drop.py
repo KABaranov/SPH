@@ -32,7 +32,8 @@ def square_drop(cfg: Config) -> None:
                 id=len(particles), m=cfg.rho0 * dx ** cfg.dim, p=0,
                 x=np.array([xi, yi, 0.]), drho_dt=0,
                 dv_dt=np.zeros(3), state=1, h=cfg.h,
-                neigh=[], grad_w=[], neigh_w=[], rho=cfg.rho0, v=np.zeros(3)
+                neigh=[], grad_w=[], neigh_w=[], rho=cfg.rho0, v=np.zeros(3),
+                T=0, k=0, c=0
             )
             particles.append(p)
 
@@ -48,7 +49,7 @@ def square_drop(cfg: Config) -> None:
     for step in tqdm(range(iterations)):
         if cfg.corrector and step % cfg.corrector_period == 0:
             cfg.corrector(particles=particles, n_iter=cfg.corrector_iter)
-        step_sph(cfg, particles, cfg.dt, box=box)
+        step_sph(cfg, particles, cfg.dt, box=box, step=step)
         xs = np.array([p.x[0] for p in particles])
         ys = np.array([p.x[1] for p in particles])
         rhos = np.array([p.rho for p in particles])

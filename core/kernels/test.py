@@ -43,7 +43,7 @@ def plot_many_kernel(kernel_dict: dict, h: float = 1.0,
     plt.legend(kernel_names)
     plt.xlabel(r'$q = r/h$')
     plt.ylabel(r'$W(q)$')
-    plt.title(f'Сравнение ядер в {dim}D')
+    # plt.title(f'Сравнение ядер в {dim}D')
     plt.grid(True)
 
 
@@ -59,7 +59,7 @@ def plot_many_gradients(grad_dict: dict, h: float = 1.0,
     plt.legend(grad_names)
     plt.xlabel(r'$q = r/h$')
     plt.ylabel(r'$W(q)$')
-    plt.title('Сравнение градиентов')
+    # plt.title('Сравнение градиентов')
     plt.grid(True)
 
 
