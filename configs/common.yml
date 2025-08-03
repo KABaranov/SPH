@@ -1,6 +1,6 @@
 # Общий файл конфигурации (обязательный)
 profile: 'water'
-scenario: 'density_test2'
+scenario: 'square_drop'
 kernel: 'wendland'
 pst: "oger"
 viscosity: "artificial"

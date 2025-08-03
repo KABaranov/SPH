@@ -1,4 +1,5 @@
-from particle_dataclass import Particle
+from SPH.core.particle.particle_dataclass import Particle
+
 import numpy as np
 from typing import List
 
@@ -87,17 +88,30 @@ def get_state(particle: Particle) -> int:
     return particle.state
 
 
+def get_T(particle: Particle) -> float:
+    return particle.T
+
+
+def get_k(particle: Particle) -> float:
+    return particle.k
+
+
+def get_c(particle: Particle) -> float:
+    return particle.c
+
+
 def get_particle_for_xyz(particle: Particle) -> str:
     r"""
 
     :param particle: Частица, параметры которой возвращаем
     :return:
         Строка для файла *.xyz: id, x, y, z, vx, vy, vz, m, rho, p,
-        h, drho_dt, dvx_dt, dvy_dt, dvz_dt, state
+        h, drho_dt, dvx_dt, dvy_dt, dvz_dt, state, T, k, c
     """
     return f"{particle.id} " \
            f"{particle.x[0]} {particle.x[1]} {particle.x[2]} " \
            f"{particle.v[0]} {particle.v[1]} {particle.v[2]} " \
            f"{particle.m} {particle.rho} {particle.p} " \
            f"{particle.h} {particle.drho_dt} " \
-           f"{particle.dv_dt[0]} {particle.dv_dt[1]} {particle.dv_dt[2]} {particle.state}"
+           f"{particle.dv_dt[0]} {particle.dv_dt[1]} {particle.dv_dt[2]} {particle.state} " \
+           f"{particle.T} {particle.k} {particle.c}"

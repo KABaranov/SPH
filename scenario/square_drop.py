@@ -3,6 +3,8 @@ from SPH.core.equations.compute_densities import compute_densities
 from SPH.core.step_sph import step_sph
 from SPH.geometry.set_particle import set_particle
 from SPH.geometry.dim2.rectangle import generate_rectangle_points
+from SPH.visualization.save_xyz import save_xyz
+from SPH.visualization.create_xyz_file import create_xyz_file
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -20,6 +22,7 @@ def square_drop(cfg: Config) -> None:
     dx = cfg.scenario_param['dx']
     iterations = int(cfg.total_time / cfg.dt)
     box = (width, height) if cfg.is_periodic else None
+    xyz_file = create_xyz_file(cfg.scenario_name)
 
     # Инициализация частиц
     particles = []
@@ -46,6 +49,8 @@ def square_drop(cfg: Config) -> None:
         ys = np.array([p.x[1] for p in particles])
         rhos = np.array([p.rho for p in particles])
         frames.append((xs, ys, rhos))
+        save_xyz(particles=particles, f=xyz_file)
+    xyz_file.close()
 
     # Границы плотности
     all_rhos = np.hstack([f[2] for f in frames])
