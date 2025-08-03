@@ -58,6 +58,7 @@ def density_test2(cfg: Config) -> None:
     rho0 = cfg.rho0  # целевая базовая плотность
     qmax = cfg.qmax  # Усечение соседей для build_neigh
     kernel = cfg.kernel
+    grad_kernel = cfg.grad
     neighbor_search = cfg.neighbor_search
     print(f"alpha={alpha}\tbeta: {beta}\tkappa0={kappa0}\tkernel={cfg.kernel_name}\n")
     if out_plot:
@@ -80,7 +81,8 @@ def density_test2(cfg: Config) -> None:
             p = Particle(
                 id=len(particles), m=m, p=0, x=np.array([x, 0, 0]),
                 drho_dt=0, dv_dt=np.array([0, 0, 0]), state=1, h=h,
-                neigh=[], neigh_w=[], rho=rho0, v=np.array([0, 0, 0])
+                neigh=[], neigh_w=[], grad_w=[], rho=rho0,
+                v=np.array([0, 0, 0]), T=0, k=0, c=0
             )
             particles.append(p)
 
@@ -88,7 +90,7 @@ def density_test2(cfg: Config) -> None:
             box = L
         else:
             box = None
-        neighbor_search(particles, h, kernel=kernel, box=box, qmax=qmax)
+        neighbor_search(particles, h=h, box=box, qmax=qmax, kernel=kernel, grad_kernel=grad_kernel)
         mean_n = np.mean([len(p.neigh) for p in particles])
         print(f"\tN: {N}\th: {h}\tmean_n: {mean_n}")
 

@@ -1,6 +1,8 @@
 from SPH.configs.config_class import Config
 from SPH.core.particle.particle_dataclass import Particle
 from SPH.core.equations.compute_densities import compute_densities
+from SPH.geometry.set_particle import set_particle
+from SPH.geometry.dim2.rectangle import generate_rectangle_points
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -23,16 +25,14 @@ def density_test1(cfg: Config) -> None:
     qmax = cfg.qmax
     kernel = cfg.kernel
     grad_kernel = cfg.grad
-    x, y = [i * dx for i in range(int(width // dx) + 1)], [i * dx for i in range(int(width // dx) + 1)]
+
+    # Инициализация частиц
     particles = []
-    for xi in x:
-        for yi in y:
-            p = Particle(
-                id=len(particles), m=cfg.rho0*(dx**dim), p=0, x=np.array([xi, yi, 0]),
-                drho_dt=0, dv_dt=np.array([0, 0, 0]), state=1, h=cfg.h, neigh=[],
-                neigh_w=[], grad_w=[], rho=cfg.rho0, v=np.array([0, 0, 0])
-            )
-            particles.append(p)
+    positions = generate_rectangle_points(
+        points=[(0, 0), (0, height), (width, height), (width, 0)], dx=dx
+    )
+    particles += (set_particle(positions=positions, id0=len(particles), rho0=cfg.rho0, dx=dx, dim=cfg.dim,
+                               p=0, h=cfg.h, drho_dt=0, state=1, T=0, k=0, c=0))
 
     neighbor_search(particles, h=h, box=box, qmax=qmax, kernel=kernel, grad_kernel=grad_kernel)
 

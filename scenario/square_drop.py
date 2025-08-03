@@ -1,5 +1,4 @@
 from SPH.configs.config_class import Config
-from SPH.core.particle.particle_dataclass import Particle
 from SPH.core.equations.compute_densities import compute_densities
 from SPH.core.step_sph import step_sph
 from SPH.geometry.set_particle import set_particle
@@ -28,7 +27,7 @@ def square_drop(cfg: Config) -> None:
         points=[(0, 0), (0, height), (width, height), (width, 0)], dx=dx
     )
     particles += (set_particle(positions=positions, id0=len(particles), rho0=cfg.rho0, dx=dx, dim=cfg.dim,
-                               p=0, h=cfg.h, drho_dt=0, state=1))
+                               p=0, h=cfg.h, drho_dt=0, state=1, T=0, k=0, c=0))
 
     # Запускаем симуляцию и сохраняем данные для каждого кадра
     frames = []  # list of (x, y, rho)
@@ -62,7 +61,7 @@ def square_drop(cfg: Config) -> None:
     plt.colorbar(sc, ax=ax, label='rho')
 
     # Добавляем слайдер
-    ax_slider = plt.axes([0.2, 0.05, 0.6, 0.03])
+    ax_slider = plt.axes((0.2, 0.05, 0.6, 0.03))
     slider = Slider(ax_slider, 'Step', 0, iterations - 1, valinit=iterations, valfmt='%0.0f')
 
     def update(val):
