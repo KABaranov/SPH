@@ -4,10 +4,8 @@ from typing import Tuple, Set
 
 
 def generate_circle_points(
-        center: Tuple[float, float],
-        radius: float,
-        dx: float
-) -> Set[Tuple[float, float]]:
+        center: Tuple[float, float], radius: float,
+        dx: float) -> Set[Tuple[float, float, float]]:
     """
     Генерирует точки внутри круга с заданным центром и радиусом.
 
@@ -38,7 +36,7 @@ def generate_circle_points(
     circle_points = set()
     for x, y in zip(grid_x.ravel(), grid_y.ravel()):
         if (x - cx) ** 2 + (y - cy) ** 2 <= radius ** 2:
-            circle_points.add((float(x), float(y)))
+            circle_points.add((float(x), float(y), float(0)))
 
     return circle_points
 

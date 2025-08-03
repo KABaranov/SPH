@@ -25,8 +25,7 @@ def point_in_triangle(pt: np.ndarray, p1: np.ndarray,
 
 def generate_triangle_points(
         points: List[Union[Tuple[float, float], List[float], np.ndarray]],
-        dx: float
-) -> Set[Tuple[float, float]]:
+        dx: float) -> Set[Tuple[float, float, float]]:
     """
     Генерирует точки внутри треугольника с шагом dx.
 
@@ -61,7 +60,7 @@ def generate_triangle_points(
     triangle_points = set()
     for (x, y) in all_points:
         if point_in_triangle(np.array([x, y]), p1, p2, p3):
-            triangle_points.add((x, y))
+            triangle_points.add((x, y, 0))
 
     return triangle_points
 

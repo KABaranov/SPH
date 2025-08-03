@@ -3,7 +3,8 @@ import matplotlib.pyplot as plt
 from typing import List, Tuple, Set, Union
 
 
-def point_in_triangle(pt: np.ndarray, p1: np.ndarray, p2: np.ndarray, p3: np.ndarray) -> bool:
+def point_in_triangle(pt: np.ndarray, p1: np.ndarray,
+                      p2: np.ndarray, p3: np.ndarray) -> bool:
     """Проверяет, находится ли точка pt внутри треугольника p1-p2-p3."""
     v0 = p3 - p1
     v1 = p2 - p1
@@ -22,10 +23,9 @@ def point_in_triangle(pt: np.ndarray, p1: np.ndarray, p2: np.ndarray, p3: np.nda
     return (u >= 0) and (v >= 0) and (u + v <= 1)
 
 
-def generate_quadrilateral_points(
+def generate_rectangle_points(
         points: List[Union[Tuple[float, float], List[float], np.ndarray]],
-        dx: float,
-) -> Set[Tuple[float, float]]:
+        dx: float,) -> Set[Tuple[float, float, float]]:
     """
     Генерирует точки внутри четырёхугольника с шагом dx.
 
@@ -60,17 +60,18 @@ def generate_quadrilateral_points(
     quad_points = set()
     for (x, y) in all_points:
         pt = np.array([x, y])
-        if point_in_triangle(pt, p1, p2, p3) or point_in_triangle(pt, p1, p3, p4):
-            quad_points.add((x, y))
+        if point_in_triangle(pt, p1, p2, p3) or point_in_triangle(pt, p1, p3, p4) or point_in_triangle(pt, p1, p2, p4):
+            quad_points.add((x, y, 0))
 
     return quad_points
 
 
 if __name__ == "__main__":
     # Пример использования
-    p1, p2, p3, p4 = (0.9, 0.7), (0.6, -0.9), (-0.6, 0.1), (-0.3, 1.2)
+    # p1, p2, p3, p4 = (0.9, 0.7), (0.6, -0.9), (-0.6, 0.1), (-0.3, 1.2)
+    p1, p2, p3, p4 = (0.0, 0.0), (0.0, 1.0), (1.0, 1.0), (1.0, 0.0)
     dx = 0.1
-    points = generate_quadrilateral_points([p1, p2, p3, p4], dx)
+    points = generate_rectangle_points([p1, p2, p3, p4], dx)
 
     # Отрисовка
     fig, ax = plt.subplots(figsize=(8, 6))

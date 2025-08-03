@@ -2,6 +2,8 @@ from SPH.configs.config_class import Config
 from SPH.core.particle.particle_dataclass import Particle
 from SPH.core.equations.compute_densities import compute_densities
 from SPH.core.step_sph import step_sph
+from SPH.geometry.set_particle import set_particle
+from SPH.geometry.dim2.rectangle import generate_rectangle_points
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -21,21 +23,12 @@ def square_drop(cfg: Config) -> None:
     box = (width, height) if cfg.is_periodic else None
 
     # Инициализация частиц
-    x_vals = np.arange(0, width + dx, dx)
-    y_vals = np.arange(0, height + dx, dx)
     particles = []
-    for xi in x_vals:
-        for yi in y_vals:
-            # if xi in [x_vals[0], x_vals[-1]] and yi in [y_vals[0], y_vals[-1]]:
-            #     continue
-            p = Particle(
-                id=len(particles), m=cfg.rho0 * dx ** cfg.dim, p=0,
-                x=np.array([xi, yi, 0.]), drho_dt=0,
-                dv_dt=np.zeros(3), state=1, h=cfg.h,
-                neigh=[], grad_w=[], neigh_w=[], rho=cfg.rho0, v=np.zeros(3),
-                T=0, k=0, c=0
-            )
-            particles.append(p)
+    positions = generate_rectangle_points(
+        points=[(0, 0), (0, height), (width, height), (width, 0)], dx=dx
+    )
+    particles += (set_particle(positions=positions, id0=len(particles), rho0=cfg.rho0, dx=dx, dim=cfg.dim,
+                               p=0, h=cfg.h, drho_dt=0, state=1))
 
     # Запускаем симуляцию и сохраняем данные для каждого кадра
     frames = []  # list of (x, y, rho)
