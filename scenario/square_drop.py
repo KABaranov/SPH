@@ -6,9 +6,6 @@ from SPH.geometry.dim2.rectangle import generate_rectangle_points
 from SPH.visualization.save_xyz import save_xyz
 from SPH.visualization.create_xyz_file import create_xyz_file
 
-import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.widgets import Slider
 from tqdm import tqdm
 
 
