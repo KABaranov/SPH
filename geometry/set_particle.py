@@ -9,10 +9,10 @@ def set_particle(positions: Set[Tuple[float, float, float]], id0: int,
                  c: float) -> List[Particle]:
     particles = []
     for pos in positions:
-        p = Particle(
+        particle = Particle(
             id=len(particles) + id0, m=rho0 * (dx ** dim), p=p, x=np.array([pos[0], pos[1], pos[2]]),
             drho_dt=drho_dt, dv_dt=np.array([0, 0, 0]), state=state, h=h, neigh=[],
             neigh_w=[], grad_w=[], rho=rho0, v=np.zeros(3), T=T, k=k, c=c
         )
-        particles.append(p)
+        particles.append(particle)
     return particles

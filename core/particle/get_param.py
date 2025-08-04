@@ -108,10 +108,10 @@ def get_particle_for_xyz(particle: Particle) -> str:
         Строка для файла *.xyz: id, x, y, z, vx, vy, vz, m, rho, p,
         h, drho_dt, dvx_dt, dvy_dt, dvz_dt, state, T, k, c
     """
-    return f"{particle.id} " \
-           f"{particle.x[0]} {particle.x[1]} {particle.x[2]} " \
-           f"{particle.v[0]} {particle.v[1]} {particle.v[2]} " \
-           f"{particle.m} {particle.rho} {particle.p} " \
-           f"{particle.h} {particle.drho_dt} " \
-           f"{particle.dv_dt[0]} {particle.dv_dt[1]} {particle.dv_dt[2]} {particle.state} " \
-           f"{particle.T} {particle.k} {particle.c}"
+    return f"{int(particle.id)} " \
+           f"{float(particle.x[0])} {float(particle.x[1])} {float(particle.x[2])} " \
+           f"{float(particle.v[0])} {float(particle.v[1])} {float(particle.v[2])} " \
+           f"{float(particle.m)} {float(particle.rho)} {float(particle.p)} " \
+           f"{float(particle.h)} {float(particle.drho_dt)} " \
+           f"{float(particle.dv_dt[0])} {float(particle.dv_dt[1])} {float(particle.dv_dt[2])} {int(particle.state)} " \
+           f"{float(particle.T)} {float(particle.k)} {float(particle.c)}"

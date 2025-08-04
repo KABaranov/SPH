@@ -26,4 +26,4 @@ total_time: 0.1
 
 # Параметры визуализации
 xyz_save: True
-dump_period: 10
+dump_period: 1

@@ -6,5 +6,5 @@ from typing import List, TextIO
 def save_xyz(particles: List[Particle], f: TextIO) -> None:
     r"""Возвращает кадр xyz для частиц"""
     f.write(f"{len(particles)}\n\n")
-    for p in particles:
-        f.write(get_particle_for_xyz(p) + "\n")
+    for particle in particles:
+        f.write(get_particle_for_xyz(particle) + "\n")
