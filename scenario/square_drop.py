@@ -36,6 +36,9 @@ def square_drop(cfg: Config) -> None:
     for step in tqdm(range(iterations)):
         if cfg.corrector and step % cfg.corrector_period == 0:
             cfg.corrector(particles=particles, n_iter=cfg.corrector_iter)
+        if cfg.xyz_save and step % cfg.dump_period:
+            save_xyz(particles=particles, f=xyz_file)
         step_sph(cfg, particles, cfg.dt, box=box, step=step)
+    if cfg.xyz_save:
         save_xyz(particles=particles, f=xyz_file)
     xyz_file.close()

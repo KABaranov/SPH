@@ -23,3 +23,7 @@ solve_heat: False
 # Шаг времени и суммарное время моделирования
 dt: 0.001
 total_time: 0.1
+
+# Параметры визуализации
+save_xyz: True
+dump_period: 10

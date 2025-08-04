@@ -76,3 +76,9 @@ class Config:
 
         self.total_time = start_param["total_time"] if "total_time" in start_param.keys() else 2.0
         self.dt = start_param["dt"] if "dt" in start_param.keys() else 0.001
+
+        if "xyz_save" in self.scenario_param.keys() and self.scenario_param["xyz_save"] in [1, "1", True, "True"]:
+            self.xyz_save = True
+        else:
+            self.xyz_save = False
+        self.dump_period = start_param["dump_period"] if "dump_period" in start_param.keys() else 1
