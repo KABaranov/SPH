@@ -60,10 +60,21 @@ class Config:
             raise ValueError(f"Нужно метод поиска соседей (neighbor_method) в параметрах")
         self.neighbor_method = start_param["neighbor_method"]
         self.neighbor_search = get_neighbor_search(name=self.neighbor_method, dim=self.dim)
-        if "is_periodic" in self.scenario_param.keys() and self.scenario_param["is_periodic"] in [1, "1", True, "True"]:
-            self.is_periodic = True
+        if "x_boundary" in self.scenario_param.keys() and self.scenario_param["x_boundary"] not in \
+                ["None", None, "0", 0, "False", False]:
+            self.x_boundary = self.scenario_param["x_boundary"]
         else:
-            self.is_periodic = False
+            self.x_boundary = "free"
+        if "y_boundary" in self.scenario_param.keys() and self.scenario_param["y_boundary"] not in \
+                ["None", None, "0", 0, "False", False]:
+            self.y_boundary = self.scenario_param["y_boundary"]
+        else:
+            self.y_boundary = "free"
+        if "z_boundary" in self.scenario_param.keys() and self.scenario_param["z_boundary"] not in \
+                ["None", None, "0", 0, "False", False]:
+            self.z_boundary = self.scenario_param["z_boundary"]
+        else:
+            self.z_boundary = "free"
         self.qmax = start_param["qmax"] if "qmax" in start_param.keys() else 10.0
 
         if "corrector" not in start_param.keys():

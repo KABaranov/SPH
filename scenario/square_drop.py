@@ -18,7 +18,7 @@ def square_drop(cfg: Config) -> None:
     height = cfg.scenario_param['height']
     dx = cfg.scenario_param['dx']
     iterations = int(cfg.total_time / cfg.dt)
-    box = (width, height) if cfg.is_periodic else None
+    box = (width + dx, height + dx)
     xyz_file = create_xyz_file(cfg.scenario_name)
 
     # Инициализация частиц

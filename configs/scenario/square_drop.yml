@@ -3,5 +3,7 @@ width: 0.25
 height: 0.25
 dim: 2
 out_plot: True
-is_periodic: False
+x_boundary: periodic
+y_boundary: periodic
+z_boundary: periodic
 solve_heat: False

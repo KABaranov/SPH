@@ -11,7 +11,7 @@ corrector_iter: 1
 corrector_period: 10
 
 # Поиск соседей (bruteforce, cell_linked, kd_tree)
-neighbor_method: "cell_linked"
+neighbor_method: "bruteforce"
 qmax: 1.9
 
 # Общие численные параметры
