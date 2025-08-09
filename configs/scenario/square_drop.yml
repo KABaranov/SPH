@@ -5,5 +5,5 @@ dim: 2
 out_plot: True
 x_boundary: periodic
 y_boundary: periodic
-z_boundary: periodic
+z_boundary: free
 solve_heat: False

@@ -9,6 +9,7 @@ from SPH.core.equations.eos import eos
 from SPH.core.equations.compute_accelerations import compute_accelerations
 from SPH.core.time_integrator.euler_cromer import euler_cromer
 from SPH.core.pst.get_pst import get_pst
+from SPH.core.boundary_condition.apply_bc import apply_bc
 
 
 def step_sph(cfg: Config, particles: List[Particle], dt: float,
@@ -41,6 +42,14 @@ def step_sph(cfg: Config, particles: List[Particle], dt: float,
 
     if cfg.pst_name != "none":
         get_pst(cfg.pst_name)(cfg=cfg, particles=particles)
+
+    # Граничные условия
+    dx = cfg.scenario_param['dx']
+    bc_box = [dx, dx, dx]
+    for i in range(len(box)):
+        bc_box[i] = box[i]
+    apply_bc(particles=particles, bounds_lo=(0, 0, 0), bounds_hi=bc_box,
+             bc_per_axis=(cfg.x_boundary, cfg.y_boundary, cfg.z_boundary))
 
     # # 6. (опционально) Интегрировать температуру/энтальпию (теплопроводность)
     # if cfg.solve_heat:

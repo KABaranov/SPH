@@ -83,9 +83,9 @@ def create_slider_animation(
     slider.on_changed(update)
     plt.show()
 
-
+    
 if __name__ == "__main__":
-    scenario_name, name = "square_drop", "2025.08.07.13.19.xyz"
+    scenario_name, name = "square_drop", "2025.08.09.14.12.xyz"
     # В файле create_slider_animation.py
     xyz_path = Path(__file__).parent.parent / "results" / scenario_name / name
 
